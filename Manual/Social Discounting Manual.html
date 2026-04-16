@@ -1,0 +1,1393 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Social Discounting Task Manual — Naomi Nero</title>
+  <meta name="description" content="A methods manual for the Social Discounting Task and Short Form: administration, data preparation, hyperbolic modeling, logk and AUC extraction, and visualization." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <style>
+    :root {
+      --bg: #fafafa;
+      --bg-elev: #ffffff;
+      --fg: #111111;
+      --fg-muted: #555555;
+      --fg-faint: #888888;
+      --border: #e5e5e5;
+      --border-strong: #d0d0d0;
+      --accent: #0d9488;
+      --accent-soft: #ccfbf1;
+      --card: #ffffff;
+      --card-tint: #f4f4f5;
+      --chip-bg: #eef2ff;
+      --shadow: 0 1px 2px rgba(0,0,0,.04), 0 4px 12px rgba(0,0,0,.04);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0b0b0d;
+        --bg-elev: #141417;
+        --fg: #f2f2f3;
+        --fg-muted: #b5b5b9;
+        --fg-faint: #777780;
+        --border: #24242a;
+        --border-strong: #33333a;
+        --accent: #2dd4bf;
+        --accent-soft: #0f3a36;
+        --card: #17171c;
+        --card-tint: #1b1b21;
+        --chip-bg: #1f2937;
+        --shadow: 0 1px 2px rgba(0,0,0,.5), 0 4px 16px rgba(0,0,0,.35);
+      }
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    code, .mono {
+      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.92em;
+    }
+
+    .shell {
+      display: grid;
+      grid-template-columns: 280px minmax(0, 1fr);
+      gap: 4rem;
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 3rem 2rem 6rem;
+    }
+
+    /* Sidebar */
+    aside.rail {
+      position: sticky;
+      top: 2rem;
+      align-self: start;
+      max-height: calc(100vh - 4rem);
+      overflow-y: auto;
+      padding-right: 0.5rem;
+    }
+    .rail .brand {
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+      margin-bottom: 0.25rem;
+    }
+    .rail .meta {
+      color: var(--fg-faint);
+      font-size: 0.78rem;
+      margin-bottom: 2rem;
+      line-height: 1.5;
+    }
+    .rail nav ol {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      counter-reset: section;
+    }
+    .rail nav li { margin: 0; }
+    .rail nav a {
+      display: block;
+      padding: 0.45rem 0.8rem 0.45rem 2.2rem;
+      position: relative;
+      color: var(--fg-muted);
+      font-size: 0.86rem;
+      border-left: 2px solid transparent;
+      line-height: 1.35;
+      counter-increment: section;
+      transition: color .15s, border-color .15s, background .15s;
+    }
+    .rail nav a::before {
+      content: counter(section, decimal-leading-zero);
+      position: absolute;
+      left: 0.75rem;
+      top: 0.5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--fg-faint);
+      letter-spacing: 0;
+    }
+    .rail nav a:hover { color: var(--fg); text-decoration: none; }
+    .rail nav a[aria-current="true"] {
+      color: var(--accent);
+      border-left-color: var(--accent);
+      background: linear-gradient(90deg, var(--accent-soft) 0%, transparent 90%);
+    }
+    .rail nav a[aria-current="true"]::before { color: var(--accent); }
+
+    /* Main column */
+    main {
+      max-width: 760px;
+      min-width: 0;
+    }
+
+    header.hero {
+      padding-bottom: 3rem;
+      margin-bottom: 3rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .eyebrow {
+      display: inline-block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-soft);
+      padding: 0.3rem 0.65rem;
+      border-radius: 999px;
+      margin-bottom: 1.25rem;
+    }
+    h1 {
+      font-size: clamp(2rem, 4.5vw, 2.8rem);
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      margin: 0 0 1rem;
+      font-weight: 700;
+    }
+    .lede {
+      font-size: 1.15rem;
+      color: var(--fg-muted);
+      max-width: 58ch;
+      margin: 0 0 1.75rem;
+    }
+    .hero-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem 2.5rem;
+      font-size: 0.85rem;
+      color: var(--fg-muted);
+    }
+    .hero-meta div span:first-child {
+      display: block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--fg-faint);
+      margin-bottom: 0.2rem;
+    }
+    .hero-meta div span:last-child { color: var(--fg); font-weight: 500; }
+
+    section.block {
+      padding-top: 4rem;
+      padding-bottom: 0.5rem;
+      scroll-margin-top: 2rem;
+    }
+    section.block:first-of-type { padding-top: 0; }
+
+    .section-head {
+      display: flex;
+      align-items: baseline;
+      gap: 0.9rem;
+      margin-bottom: 1.25rem;
+    }
+    .section-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 2.1rem;
+      padding: 0.2rem 0.55rem;
+      background: var(--chip-bg);
+      color: var(--accent);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      font-weight: 500;
+      border-radius: 6px;
+      letter-spacing: 0.05em;
+    }
+    h2 {
+      font-size: 1.55rem;
+      line-height: 1.25;
+      letter-spacing: -0.01em;
+      margin: 0;
+      font-weight: 700;
+    }
+    h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin: 2rem 0 0.6rem;
+      letter-spacing: -0.005em;
+    }
+    h4 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin: 1.5rem 0 0.4rem;
+      color: var(--fg);
+    }
+    p { margin: 0 0 1.1rem; color: var(--fg); }
+    ul, ol { margin: 0 0 1.2rem; padding-left: 1.3rem; }
+    li { margin-bottom: 0.35rem; }
+
+    /* Cards */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.4rem 1.5rem;
+      margin: 1.25rem 0 1.75rem;
+      box-shadow: var(--shadow);
+    }
+    .card.tint { background: var(--card-tint); }
+    .card-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--fg-faint);
+      margin-bottom: 0.9rem;
+    }
+
+    /* Trial mockup */
+    .trial-card .prompt {
+      font-size: 0.88rem;
+      padding: 0.7rem 0.9rem;
+      background: var(--card-tint);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--fg-muted);
+      margin-bottom: 0.9rem;
+      line-height: 1.5;
+    }
+    .trial-choices {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+
+    .trial-choices.vertical {
+      grid-template-columns: 1fr;
+      justify-items: center;
+    }
+    .choice {
+      border: 1px solid var(--border-strong);
+      border-radius: 10px;
+      padding: 0.9rem 1rem;
+      font-size: 0.9rem;
+      background: var(--bg-elev);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      line-height: 1.35;
+      width: fit-content;
+      max-width: 520px;
+      min-width: 320px;
+      justify-content: center;
+    }
+    .choice .radio {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 1.5px solid var(--border-strong);
+      flex-shrink: 0;
+    }
+    .choice strong { font-weight: 600; color: var(--fg); }
+    .choice span { color: var(--fg-muted); }
+
+    /* Tables */
+    .table-wrap { overflow-x: auto; margin: 1rem 0 1.75rem; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+    th, td {
+      text-align: left;
+      padding: 0.65rem 0.9rem;
+      border-bottom: 1px solid var(--border);
+    }
+    thead th {
+      font-weight: 600;
+      color: var(--fg);
+      border-bottom: 2px solid var(--border-strong);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--fg-muted);
+    }
+    tbody td.mono, tbody td code { color: var(--fg); }
+
+    /* Formula block */
+    .formula {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem 1rem;
+      text-align: center;
+      margin: 1.5rem 0;
+      font-size: 1.2rem;
+      overflow-x: auto;
+    }
+
+    /* Callouts */
+    .callout {
+      border-left: 3px solid var(--accent);
+      background: var(--card-tint);
+      padding: 1rem 1.2rem;
+      border-radius: 0 8px 8px 0;
+      margin: 1.25rem 0 1.75rem;
+      font-size: 0.92rem;
+    }
+    .callout strong { color: var(--accent); }
+
+    /* Inline code for variable names */
+    .var, p code, li code, td code {
+      background: var(--card-tint);
+      padding: 0.1rem 0.4rem;
+      border-radius: 4px;
+      color: var(--fg);
+      border: 1px solid var(--border);
+    }
+
+    /*Code for formatting the $ sigh */
+    .money {
+      font-variant-numeric: normal;
+    }
+
+    /* AIC rules */
+    .aic-rules {
+      display: grid;
+      gap: 0.6rem;
+      margin: 1rem 0 1.5rem;
+    }
+    .aic-rules .row {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      gap: 1rem;
+      padding: 0.6rem 0.9rem;
+      background: var(--card-tint);
+      border-radius: 8px;
+      font-size: 0.9rem;
+      align-items: center;
+    }
+    .aic-rules .row .tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    /* SVG curve */
+    .curve-wrap {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin: 1.5rem 0 1rem;
+    }
+    .curve-wrap svg { width: 100%; height: auto; display: block; }
+    .curve-wrap .caption {
+      font-size: 0.82rem;
+      color: var(--fg-faint);
+      text-align: center;
+      margin-top: 0.75rem;
+    }
+
+    /* Footer */
+    footer.foot {
+      margin-top: 5rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.85rem;
+      color: var(--fg-muted);
+    }
+
+    /* Mobile */
+    @media (max-width: 960px) {
+      .shell {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+        padding: 2rem 1.25rem 4rem;
+      }
+      aside.rail {
+        position: static;
+        max-height: none;
+        padding: 0;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 1rem;
+      }
+      aside.rail nav { margin-top: 0.75rem; }
+      aside.rail details summary {
+        cursor: pointer;
+        font-size: 0.85rem;
+        color: var(--accent);
+        font-weight: 500;
+        padding: 0.5rem 0;
+      }
+      h1 { font-size: 2rem; }
+      .trial-choices { grid-template-columns: 1fr; }
+    }
+
+    /* References */
+    .references {
+      color: var(--fg-faint); /* light gray like your figure captions */
+      font-size: 0.88rem;
+    }
+
+    .references p {
+      margin: 0 0 0.9rem;
+      padding-left: 1.5rem;
+      text-indent: -1.5rem; /* creates hanging indent */
+      line-height: 1.5;
+      scroll-margin-top: 2rem;
+    }
+
+    .references a {
+      color: var(--fg-faint);
+      text-decoration: underline;
+    }
+
+    .references a:hover {
+      color: var(--accent);
+    }
+    
+    #references {
+      scroll-margin-top: 2rem;
+    }
+
+    .references p {
+      transition: background-color 0.6s ease;
+      border-radius: 6px;
+    }
+
+    .references p.highlight {
+      background-color: rgba(255, 235, 150, 0.35); /* soft yellow */
+    }
+
+    a.cite {
+      color: var(--fg-muted);
+      text-decoration: none;
+    }
+
+    a.cite:hover {
+      text-decoration: underline;
+      color: var(--accent);
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="rail">
+      <div class="brand">Social Discounting Task Manual</div>
+      <div class="meta">Version 1.0 · April 2026<br />Naomi Nero · Georgetown University</div>
+      <nav aria-label="Table of contents">
+        <details open>
+          <summary>Contents</summary>
+          <ol>
+            <li><a href="#general-remarks">General Remarks</a></li>
+            <li><a href="#introduction">Introduction</a></li>
+            <li><a href="#the-measures">The Measures</a></li>
+            <li><a href="#hyperbolic-function">The Hyperbolic Function</a></li>
+            <li><a href="#data-collection">Data Collection</a></li>
+            <li><a href="#data-preparation">Data Preparation</a></li>
+            <li><a href="#data-cleaning">Cleaning &amp; Max Willing to Forgo</a></li>
+            <li><a href="#hyperbolic-model">Hyperbolic Model</a></li>
+            <li><a href="#logk-auc">Extracting logk and AUC</a></li>
+            <li><a href="#visualization">Visualization</a></li>
+            <li><a href="#references">References</a></li>
+          </ol>
+        </details>
+      </nav>
+    </aside>
+
+    <main>
+      <header class="hero">
+        <span class="eyebrow">Methods Manual · v1.0</span>
+        <h1>The Social Discounting Task Manual</h1>
+        <p class="lede">
+          Conceptual background, administration, and a step-by-step guide for
+          data cleaning and analysis of the Social Discounting Task and the
+          Social Discounting Task Short Form.
+        </p>
+        <div class="hero-meta">
+          <div><span>Author</span><span>Naomi Nero</span></div>
+          <div><span>Affiliation</span><span>Georgetown University, Dept. of Psychology</span></div>
+          <div><span>Version</span><span>1.0 · April 2026</span></div>
+          <div><span>Contact</span><span><a href="mailto:nn444@georgetown.edu">nn444@georgetown.edu</a></span></div>
+        </div>
+      </header>
+
+      <section id="general-remarks" class="block">
+        <div class="section-head">
+          <span class="section-num">01</span>
+          <h2>General Remarks</h2>
+        </div>
+        <p>
+          This manual provides conceptual background on the purpose of the
+          <strong>Social Discounting Task</strong> (Jones &amp; Rachlin, <a href="#jones2006" class="cite">2006</a>, <a href="#jones2009" class="cite">2009</a>), a
+          description of how the task is administered, and a step-by-step guide
+          for data cleaning and analysis. In addition to the original Social
+          Discounting Task, this manual includes background information, data
+          preparation procedures, and analytic steps for the <strong>Social Discounting
+          Task Short Form</strong> (Amormino et al., <a href="#amormino2025" class="cite">2025</a>, <a href="#amormino2026" class="cite">2026</a>).
+        </p>
+        <p>
+          It is designed to be used alongside the accompanying R Markdown
+          script, which walks users through the full data processing pipeline
+          for both versions of the task. The repository also includes
+          downloadable Qualtrics survey templates for the original and Short
+          Form, allowing researchers to easily implement the measures. These
+          templates are pre-formatted with the correct item and question names
+          that correspond with the R Markdown script. Altogether, these
+          materials are intended to support transparent, reproducible use of
+          social discounting paradigms in behavioral research.
+        </p>
+      </section>
+
+      <section id="introduction" class="block">
+        <div class="section-head">
+          <span class="section-num">02</span>
+          <h2>Introduction</h2>
+        </div>
+        <p>
+          The Social Discounting task was originally developed by <a href="#jones2006" class="cite">Jones &amp; Rachlin (2006)</a>
+          as a behavioral measure of how individuals value the
+          welfare of others as a function of social distance. In this paradigm,
+          participants make decisions about allocating monetary rewards between
+          themselves and another person who varies in closeness to them, or
+          social distance.
+        </p>
+        <p>
+          Conceptually, social discounting is closely related to temporal
+          discounting, which examines how people devalue rewards that occur in
+          the future compared to immediate rewards. In contrast, social
+          discounting examines how individuals discount the welfare of others
+          depending on how socially close or distant those others are. The task
+          therefore provides a behavioral index of generosity and social
+          valuation.
+        </p>
+        <p>
+          The Social Discounting Task has been used by many researchers
+          examining the relationship between social valuation and prosocial
+          behavior (<a href="#amormino2025" class="cite">Amormino et al., 2025</a>), individual differences in
+          personality and antisocial traits (<a href="#malesza2021" class="cite">Maleszka &amp; Kalinowski, 2021</a>;
+          <a href="#nero2025" class="cite">Nero et al., 2025</a>;
+          <a href="#romanowich2021" class="cite">Romanowich et al., 2021</a>;
+          <a href="#sharp2012" class="cite">Sharp et al., 2012</a>),
+          social relationships and perceived closeness (<a href="#rhoads2023" class="cite">Rhoads et al., 2023</a>;
+          <a href="#sherman2017" class="cite">Sherman &amp; Lynam, 2017</a>). 
+        </p>
+        
+        <p>This manual provides guidance for implementing and analyzing two versions of the measure:</p>
+        <ol>
+          <li>The Original Social Discounting Task (<a href="#jones2006" class="cite">Jones &amp; Rachlin, 2006</a>)</li>
+          <li>The Social Discounting Task Short Form (<a href="#amormino2025" class="cite">Amormino et al., 2025</a>), a shorter, more efficient version of the task</li>
+        </ol>
+      </section>
+
+      <section id="the-measures" class="block">
+        <div class="section-head">
+          <span class="section-num">03</span>
+          <h2>The Measures</h2>
+        </div>
+
+        <h3>The Original Social Discounting Task</h3>
+        <p>
+          The Social Discounting Task asks participants to imagine a list of
+          100 people, with position #1 being the person closest to them and
+          position #100 being a stranger. Participants are then asked to
+          provide the name and relationship of real individuals they know who
+          correspond to seven specific social distances
+          (<span class="var">N = 1, 2, 5, 10, 20, 50, 100</span>).
+        </p>
+        <p>
+          For each of the seven names provides (corresponding to seven social distances), participants make a series of
+          nine dichotomous choices. In each choice, participants can select a
+          selfish option (keep money for themselves) or a generous option
+          (share money with the person at the specified social distance). For
+          each social distance, the selfish option begins with the participant
+          keeping <strong>$155</strong>, and the amount decreases by $10 across
+          nine decisions, ending with the option to keep <strong>$75</strong>.
+          Alternatively, participants may choose the generous option of
+          splitting <strong>$150</strong> with the social distance.
+        </p>
+
+        <div class="card trial-card">
+          <div class="card-label">Figure 1 · example trial (original task)</div>
+
+          <div class="prompt">
+            Remember you made a list of the 100 people closest to you in the world, ranging from your dearest friend or relative at #1 to a mere acquaintance or stranger at #100. You will now be making choices for the #1 person on the list, <span class="var">XXX</span>.
+          </div>
+
+          <div class="trial-choices" style="display: flex; flex-direction: column; gap: 0.75rem;">
+
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+              <div class="choice"><span class="radio"></span><span><strong>$155</strong> for you alone</span></div>
+              <div class="choice"><span class="radio"></span><span><strong>$75</strong> for you and <strong>$75</strong> for the #1 person</span></div>
+            </div>
+
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+              <div class="choice"><span class="radio"></span><span><strong>$145</strong> for you alone</span></div>
+              <div class="choice"><span class="radio"></span><span><strong>$75</strong> for you and <strong>$75</strong> for the #1 person</span></div>
+            </div>
+
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+              <div class="choice"><span class="radio"></span><span><strong>$135</strong> for you alone</span></div>
+              <div class="choice"><span class="radio"></span><span><strong>$75</strong> for you and <strong>$75</strong> for the #1 person</span></div>
+            </div>
+
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+              <div class="choice"><span class="radio"></span><span><strong>$125</strong> for you alone</span></div>
+              <div class="choice"><span class="radio"></span><span><strong>$75</strong> for you and <strong>$75</strong> for the #1 person</span></div>
+            </div>
+
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+              <div class="choice"><span class="radio"></span><span><strong>$115</strong> for you alone</span></div>
+              <div class="choice"><span class="radio"></span><span><strong>$75</strong> for you and <strong>$75</strong> for the #1 person</span></div>
+            </div>
+
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+              <div class="choice"><span class="radio"></span><span><strong>$105</strong> for you alone</span></div>
+              <div class="choice"><span class="radio"></span><span><strong>$75</strong> for you and <strong>$75</strong> for the #1 person</span></div>
+            </div>
+
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+              <div class="choice"><span class="radio"></span><span><strong>$95</strong> for you alone</span></div>
+              <div class="choice"><span class="radio"></span><span><strong>$75</strong> for you and <strong>$75</strong> for the #1 person</span></div>
+            </div>
+
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+              <div class="choice"><span class="radio"></span><span><strong>$85</strong> for you alone</span></div>
+              <div class="choice"><span class="radio"></span><span><strong>$75</strong> for you and <strong>$75</strong> for the #1 person</span></div>
+            </div>
+
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+              <div class="choice"><span class="radio"></span><span><strong>$75</strong> for you alone</span></div>
+              <div class="choice"><span class="radio"></span><span><strong>$75</strong> for you and <strong>$75</strong> for the #1 person</span></div>
+            </div>
+
+          </div>
+        </div>
+
+        <p>
+          These choices allow for the calculation of the "indifference point",
+          defined as the point at which participants switch from choosing the
+          selfish option to choosing the generous option. From this indifference
+          point, the maximum amount of money the individual is willing to forgo for that social distance
+          is generated by subtracting <span class="money">$75</span> from the indifference point for each
+          block for each participant. For example, if someone switched from
+          being selfish to being generous at the second trial when offered to
+          keep <span class="money">$145</span> or split <span class="money">$150</span>, the participant has sacrificed <span class="money">$70</span> (<span class="money">$145</span> −
+          <span class="money">$75</span>), representing the maximum amount willing to forgo. This results
+          in 7 "maximum amount willing to forgo" values, one for each social
+          distance, for each participant. These seven values are later used to
+          estimate the social discounting function using a hyperbolic model.
+        </p>
+        <p>
+          For participants who chose the selfish option for all the trials for
+          the social distance, the indifference point is assumed at the final
+          trial (<span class="money">$75</span>) and the amount willing to forgo is <span class="money">$0</span>. For participants
+          who chose the generous option for all trials in the block, the
+          indifference point is assumed at the first trial (<span class="money">$155</span>) and the
+          amount willing to forgo is <span class="money">$80</span>.
+        </p>
+
+        <h3>Social Discounting Task Short Form</h3>
+        <p>
+          Although the original Social Discounting Task has produced robust
+          findings, completing the task typically takes approximately 4-5
+          minutes. The Social Discounting Short Form was therefore developed to
+          provide a more efficient version of the measure.
+        </p>
+        <p>
+          Participants are still instructed to imagine a list of 100 people and
+          then provide the names and relationships corresponding to seven
+          social distances (<span class="var">N = 1, 2, 5, 10, 20, 50, 100</span>).
+          However, rather than making 7 decisions per social distance,
+          participants make a single decision for each distance. This reduces
+          the total number of decisions from 63 to 7 and shortens completion
+          time. For each social distance, participants decide how to split <span class="money">$10</span>
+          between themselves and the social distance. Response options range
+          from keeping all <span class="money">$10</span> and giving <span class="money">$0</span> to the other person, to giving the
+          full <span class="money">$10</span> to the other person. Importantly, unlike the original task,
+          participants have the option to give more to the other person than
+          they keep for themselves. From these seven decisions, the maximum
+          amount willing to forgo is calculated as <span class="var">$10 −
+          the amount kept</span> for each social distance.
+        </p>
+
+        <div class="card trial-card">
+          <div class="card-label">Figure 2 · example trial (short form)</div>
+
+          <div class="prompt">
+            Imagine you have been given ten dollars. You are to divide the $10 between yourself and the #1 person on your list, <span class="var">XXX</span>. You are free to give as much or as little of the amount of money as you wish, and you will receive what is left.
+          </div>
+
+          <div class="trial-choices vertical">
+
+            <label class="choice">
+              <input type="radio" name="split1" value="10_0">
+              <span><strong>$10</strong> for you and <strong>$0</strong> for the #1 person</span>
+            </label>
+
+            <label class="choice">
+              <input type="radio" name="split1" value="9_1">
+              <span><strong>$9</strong> for you and <strong>$1</strong> for the #1 person</span>
+            </label>
+
+            <label class="choice">
+              <input type="radio" name="split1" value="8_2">
+              <span><strong>$8</strong> for you and <strong>$2</strong> for the #1 person</span>
+            </label>
+
+            <label class="choice">
+              <input type="radio" name="split1" value="7_3">
+              <span><strong>$7</strong> for you and <strong>$3</strong> for the #1 person</span>
+            </label>
+
+            <label class="choice">
+              <input type="radio" name="split1" value="6_4">
+              <span><strong>$6</strong> for you and <strong>$4</strong> for the #1 person</span>
+            </label>
+
+            <label class="choice">
+              <input type="radio" name="split1" value="5_5">
+              <span><strong>$5</strong> for you and <strong>$5</strong> for the #1 person</span>
+            </label>
+
+            <label class="choice">
+              <input type="radio" name="split1" value="4_6">
+              <span><strong>$4</strong> for you and <strong>$6</strong> for the #1 person</span>
+            </label>
+
+            <label class="choice">
+              <input type="radio" name="split1" value="3_7">
+              <span><strong>$3</strong> for you and <strong>$7</strong> for the #1 person</span>
+            </label>
+
+            <label class="choice">
+              <input type="radio" name="split1" value="2_8">
+              <span><strong>$2</strong> for you and <strong>$8</strong> for the #1 person</span>
+            </label>
+
+            <label class="choice">
+              <input type="radio" name="split1" value="1_9">
+              <span><strong>$1</strong> for you and <strong>$9</strong> for the #1 person</span>
+            </label>
+
+            <label class="choice">
+              <input type="radio" name="split1" value="0_10">
+              <span><strong>$0</strong> for you and <strong>$10</strong> for the #1 person</span>
+            </label>
+
+          </div>
+        </div>
+      </section>
+
+      <section id="hyperbolic-function" class="block">
+        <div class="section-head">
+          <span class="section-num">04</span>
+          <h2>Modeling Social Discounting: The Hyperbolic Function</h2>
+        </div>
+        <p>
+          Social discounting is typically modeled using a hyperbolic discounting
+          function, which describes how the value assigned to another person
+          decreases as social distance increases. The hyperbolic model is
+          defined as:
+        </p>
+        <div class="formula">
+          $$ V \;=\; \frac{V_0}{1 + k\,N} $$
+        </div>
+        <p>Where:</p>
+        <ul>
+          <li><span class="var">V</span> — amount willing to forgo at a given social distance</li>
+          <li><span class="var">V₀</span> — generosity toward the closest other (intercept; social distance = 0)</li>
+          <li><span class="var">k</span> — the social discounting rate</li>
+          <li><span class="var">N</span> — social distance</li>
+        </ul>
+        <p>
+          The parameter <span class="var">k</span> reflects how steeply
+          generosity declines as social distance increases. Higher
+          <span class="var">k</span> values indicate steeper discounting; lower
+          values indicate shallower discounting. Because <span class="var">k</span>
+          is constrained to be positive and is often highly skewed, it is
+          typically estimated on the log scale and reported as
+          <span class="var">logk</span>. In the model implementation used here,
+          <span class="var">logk</span> is estimated and then exponentiated
+          (i.e., <span class="var">k = exp(logk)</span>) to ensure that
+          <span class="var">k</span> remains positive.
+        </p>
+        <div class="callout">
+          <p><strong>Interpreting logk.</strong> A more <em>negative</em> logk indicates <em>shallower</em> social discounting (greater generosity across social distances). A more <em>positive</em> logk indicates <em>steeper</em> social discounting (generosity declining more quickly with distance).</p>
+        </div>
+        <p>
+          In addition to estimating <span class="var">k</span>, researchers
+          often compute the <strong>Area Under the Curve (AUC)</strong>. AUC is
+          a model-free measure of social discounting and represents the overall
+          generosity across all social distances. It is computed by plotting the
+          amount willing to forgo at each social distance and computing the
+          total area under the resulting discounting curve. AUC values range
+          from 0 to 1, with higher values indicating greater generosity
+          (shallower discounting) and lower values indicating less generosity
+          (steeper discounting).
+        </p>
+        <p>
+          Both logk and AUC capture the same underlying construct: logk is
+          model-based, AUC is model-free. logk represents the rate at which
+          social valuation changes with social distance, whereas AUC represents
+          overall social valuation across all social distances.
+        </p>
+      </section>
+
+      <section id="data-collection" class="block">
+        <div class="section-head">
+          <span class="section-num">05</span>
+          <h2>Data Collection</h2>
+        </div>
+        <p>
+          This repository provides two mechanisms for collecting data for both
+          the original and short-form tasks that work with the provided R
+          Markdown analysis scripts: (1) Qualtrics survey templates and (2)
+          R-based Shiny applications. This manual corresponds to Qualtrics
+          Templates, Shiny Applications, and R Markdown scripts version 1.0.
+        </p>
+
+        <h3>Qualtrics Templates</h3>
+        <p>
+          Downloadable Qualtrics survey templates are provided for both
+          versions of the task. These templates are pre-formatted with the
+          correct item structure and variable names, allowing for
+          straightforward implementation. Once uploaded into Qualtrics, the
+          surveys can be used without further modification, and response data
+          will align directly with the accompanying analysis scripts.
+        </p>
+
+        <h3>Shiny Applications</h3>
+        <p>
+          We also provide R code to run custom Shiny applications for both the
+          original task and the Short Form. These are interactive web-based
+          implementations developed in R using the Shiny framework. They
+          standardize task presentation, automate progression, and directly
+          record participant responses in a structured format that corresponds
+          with the analysis scripts.
+        </p>
+        <p>
+          To run the applications locally, open the corresponding R script in
+          RStudio and click "Run App" (or execute
+          <code>shiny::runApp()</code> from the console). Each application
+          guides participants through the full task sequence:
+        </p>
+        <ul>
+          <li>Entry of a participant identifier by the researcher</li>
+          <li>Instruction screens</li>
+          <li>Entry of social distance names and relationships</li>
+          <li>Decision-making trials for each social distance condition</li>
+        </ul>
+        <p>
+          Upon completion, the application automatically exports a
+          <code>.csv</code> file containing participant responses in wide
+          format that can be combined with those from other participants and
+          then used in the analysis scripts.
+        </p>
+      </section>
+
+      <section id="data-preparation" class="block">
+        <div class="section-head">
+          <span class="section-num">06</span>
+          <h2>Data Preparation</h2>
+        </div>
+        <p>
+          The following sections describe tips for preparing, cleaning, and
+          analyzing social discounting data. The procedures are based on the
+          outputs from the Qualtrics templates or Shiny apps, but steps can be
+          modified or adapted for datasets collected using other survey
+          formats. This section covers:
+        </p>
+        <ol>
+          <li>Overview of expected data structure</li>
+          <li>Data cleaning procedures</li>
+          <li>Calculation of indifference points and maximum amount willing to forgo</li>
+          <li>Hyperbolic Model (and comparison to exponential and linear models)</li>
+          <li>Extraction of logk and AUC</li>
+        </ol>
+
+        <h3>Data Overview</h3>
+        <p>
+          Using the provided Qualtrics templates or Shiny Apps ensures the
+          correct structure automatically, but if you create your own survey,
+          following these conventions is necessary for the scripts to work
+          properly.
+        </p>
+        <ul>
+          <li><strong>CSV format:</strong> export from Qualtrics as a CSV file with response values, not labels.</li>
+          <li><strong>Subject identifier:</strong> column <code>subnum</code> should contain unique participant IDs. Participants without a value in <code>subnum</code> will be removed during data cleaning.</li>
+        </ul>
+        <div class="callout">
+          <p><strong>Note.</strong> The Qualtrics templates have a question where a participant ID can be entered manually; however, Qualtrics can also randomly generate participant IDs (added in the survey flow) or embed IDs into the survey link.</p>
+        </div>
+
+        <h3>Social Discounting Task: Trial Naming and Variables</h3>
+        <p>
+          Trials from the original social discounting task follow the naming
+          convention <code>sd[distance]_[trial]</code>, where
+          <em>distance</em> is social distance (1, 2, 5, 10, 20, 50, 100) and
+          <em>trial</em> is the trial number within that social discounting
+          block (1–9).
+        </p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Social distance</th><th>Trial variables</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td><code>sd1_1 – sd1_9</code></td></tr>
+              <tr><td>2</td><td><code>sd2_1 – sd2_9</code></td></tr>
+              <tr><td>5</td><td><code>sd5_1 – sd5_9</code></td></tr>
+              <tr><td>10</td><td><code>sd10_1 – sd10_9</code></td></tr>
+              <tr><td>20</td><td><code>sd20_1 – sd20_9</code></td></tr>
+              <tr><td>50</td><td><code>sd50_1 – sd50_9</code></td></tr>
+              <tr><td>100</td><td><code>sd100_1 – sd100_9</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h4>Response coding</h4>
+        <p>
+          Responses are recoded in Qualtrics. For trials 1–8,
+          <code>0</code> indicates the participant kept the larger sum of money
+          for themselves, while positive values (10–80) indicate the participant shared the money.
+          These positive values are calculated by subtracting 75 from the
+          amount offered to keep for themselves, generating the <strong>amount willing to forgo</strong>
+          that trial (e.g., $155 for you, or give $75 and keep $75, is recoded
+          to 80). For Trial 9 (keep $75 for yourself, or give $75 to N and
+          keep $75), <code>-5</code> indicates the participant kept the money
+          and <code>0</code> indicates they shared. These recoded values are
+          used to calculate the indifference point and the maximum amount
+          willing to forgo.
+        </p>
+
+        <h3>Short Form: Trial Naming and Variables</h3>
+        <p>
+          Trials from the Social Discounting Task Short Form follow the naming
+          convention <code>X[block number]_SDshortdecision</code>, where the
+          block number corresponds to social distance (block 1 = N1, block 2 =
+          N2, block 3 = N5, block 4 = N10, block 5 = N20, block 6 = N50, block
+          7 = N100).
+        </p>
+        <h4>Response coding</h4>
+        <p>
+          Responses are recoded in Qualtrics and each social distance has one
+          response value. Response options are recoded to reflect the amount
+          given to the N for that choice (e.g., keep $10 and give $0 is
+          recoded to 0).
+        </p>
+      </section>
+
+      <section id="data-cleaning" class="block">
+        <div class="section-head">
+          <span class="section-num">07</span>
+          <h2>Data Cleaning &amp; Maximum Willing to Forgo</h2>
+        </div>
+
+        <h3>Social Discounting Task</h3>
+        <p>
+          Using the answer choices in Qualtrics with the recoded values, the
+          following steps describe the data cleaning procedures to calculate
+          participant-level indifference points and the maximum amount willing
+          to forgo.
+        </p>
+        <ol>
+          <li><strong>Reshape data (wide to long).</strong> Raw Qualtrics exports contain each trial as a separate column (e.g., <code>sd1_1</code>, <code>sd10_5</code>). After reshaping, the <code>trial</code> column contains the trial name and the <code>choice</code> column contains the participant's response.</li>
+          <li><strong>Split trial information.</strong> Each trial name contains two pieces of information: social distance and trial number within the distance block. These are split into separate columns (<code>distance</code> and <code>amount1</code>).</li>
+          <li><strong>Recode choice values.</strong> Most trials are coded as 0 = kept and a positive value (10–80) = shared. Trial 9 uses −5 = kept and 0 = shared. To simplify calculation of the crossover point, −5 is temporarily recoded to 5.</li>
+          <li><strong>Remove invalid/missing responses.</strong> Rows with missing responses are removed and all <code>choice</code> values are confirmed to be numeric. Only rows with <code>choice</code> ≥ 0 are retained (after recoding −5 to 5).</li>
+          <li><strong>Convert social distance labels to numeric.</strong> Distance labels (<code>sd1</code>, <code>sd2</code>, …) are converted to numeric values (1, 2, …) in a new column called <code>Distance</code>.</li>
+          <li><strong>Compute indifference points and maximum amount willing to forgo.</strong> For each participant and social distance, identify the maximum choice for that distance. This represents the crossover point where the participant switched from keeping money. Either a switch from a positive number (10–80) to 0, or a switch from 0 to 5 (if the participant kept money for all trials). The maximum choice value for that distance is stored in a new column called <code>max_rating</code>. Any temporary 5 values are converted back to −5 to distinguish participants who kept money on all trials as having their maximum willing to forgo at the last trial. The output is a dataframe called <code>trial_filtered_data</code> containing one row per participant per social distance, with the value under <code>max_rating</code> representing the maximum amount willing to forgo.</li>
+        </ol>
+
+        <h4>Reference table — amounts offered to keep</h4>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Trial number</th><th>Amount offered</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td>$155</td></tr>
+              <tr><td>2</td><td>$145</td></tr>
+              <tr><td>3</td><td>$135</td></tr>
+              <tr><td>4</td><td>$125</td></tr>
+              <tr><td>5</td><td>$115</td></tr>
+              <tr><td>6</td><td>$105</td></tr>
+              <tr><td>7</td><td>$95</td></tr>
+              <tr><td>8</td><td>$85</td></tr>
+              <tr><td>9</td><td>$75</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout">
+          <p><strong>Note.</strong> Alternative methods exist for participants who switch back and forth multiple times, but this approach uses the first crossover to standardize calculations.</p>
+        </div>
+
+        <h3>Short Form</h3>
+        <p>
+          Data cleaning for the Short Form is more straightforward than the
+          original task because participants make only one decision per social
+          distance, reducing the total number of trials from 63 to 7 and
+          eliminating the need to calculate indifference points.
+        </p>
+        <ol>
+          <li><strong>Reshape data (wide to long).</strong> Raw exports contain one column per social distance decision (e.g., <code>X1_SDshort_decision</code>). After reshaping, <code>trial</code> contains the trial name and <code>max_rating</code> contains the participant's response.</li>
+          <li><strong>Split trial information.</strong> The trial name is split into <code>distance</code> (e.g., <code>X1</code>) and <code>amount1</code> (every row will have <code>SDshort_decision</code>).</li>
+          <li><strong>Remove invalid/missing responses.</strong> Rows with missing responses are removed and <code>max_rating</code> is confirmed numeric. Only rows with <code>max_rating ≥ 0</code> are retained.</li>
+          <li><strong>Convert social distance labels to numeric.</strong> Using the table below.</li>
+        </ol>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Label</th><th>Distance</th></tr></thead>
+            <tbody>
+              <tr><td><code>X1</code></td><td>1</td></tr>
+              <tr><td><code>X2</code></td><td>2</td></tr>
+              <tr><td><code>X3</code></td><td>5</td></tr>
+              <tr><td><code>X4</code></td><td>10</td></tr>
+              <tr><td><code>X5</code></td><td>20</td></tr>
+              <tr><td><code>X6</code></td><td>50</td></tr>
+              <tr><td><code>X7</code></td><td>100</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>
+          In the Short Form, each decision directly represents the amount the
+          participant is willing to give to the N. Therefore, there is no need
+          to calculate a crossover point — the <code>max_rating</code> column
+          is equivalent to the maximum amount willing to forgo for that social
+          distance.
+        </p>
+      </section>
+
+      <section id="hyperbolic-model" class="block">
+        <div class="section-head">
+          <span class="section-num">08</span>
+          <h2>Hyperbolic Model</h2>
+        </div>
+        <p>
+          After computing the maximum amount willing to forgo for each
+          participant and social distance, the next step is to estimate the
+          hyperbolic discounting function using nonlinear mixed-effects
+          modeling. The provided R script uses the <code>nlme</code> package to
+          estimate both:
+        </p>
+        <ul>
+          <li><strong>Fixed effects</strong> — overall average <span class="var">v0</span> and <span class="var">logk</span></li>
+          <li><strong>Random effects</strong> — participant-specific deviations in <span class="var">v0</span> and <span class="var">logk</span></li>
+        </ul>
+
+        <h3>1. Base model (no predictors)</h3>
+        <p>
+          The base model estimates the hyperbolic function without including
+          predictors/covariates and is used to obtain participant-level
+          <span class="var">logk</span> values. Researchers should typically
+          (1) run the base model first, (2) extract individual
+          <span class="var">logk</span> values, and (3) use those values in
+          subsequent analyses (e.g., regression models).
+        </p>
+        <p>Key components:</p>
+        <ul>
+          <li><code>v0 / (1 + exp(logk) * Distance)</code> → hyperbolic function</li>
+          <li><code>exp(logk)</code> → ensures the discounting parameter <span class="var">k</span> is positive</li>
+          <li><code>random = v0 + logk ~ 1 | subnum</code> → estimates individual-level parameters</li>
+        </ul>
+
+        <h3>2. Alternative models (optional but recommended)</h3>
+        <p>
+          Although the hyperbolic model is standard in social discounting
+          research, it is good practice to compare it with alternative models.
+          We compare it to an exponential model (constant rate of decline) and
+          a linear model (straight-line decrease).
+        </p>
+        <p>
+          Models are compared using Akaike's Information Criterion (AIC). AIC
+          balances model fit and model complexity; lower AIC values indicate
+          better-fitting models. We provide two ways to compare AIC:
+        </p>
+        <h4>Delta AIC (ΔAIC)</h4>
+        <p>
+          ΔAIC represents how much worse a model fits relative to the
+          best-fitting model. It is calculated by subtracting the lowest AIC
+          from each candidate model's AIC. In most cases, the hyperbolic model
+          has the lowest AIC, so ΔAIC values for exponential and linear are
+          positive:
+        </p>
+        <div class="aic-rules">
+          <div class="row"><span class="tag">ΔAIC &lt; 2</span><span>Substantial support (models are essentially equivalent)</span></div>
+          <div class="row"><span class="tag">ΔAIC 4–7</span><span>Considerably less support</span></div>
+          <div class="row"><span class="tag">ΔAIC &gt; 10</span><span>Essentially no support (lower AIC model is a better fit)</span></div>
+        </div>
+        <h4>AIC weights</h4>
+        <p>
+          AIC weights represent the relative likelihood that each model is the
+          best among the candidate models. Each model is assigned a weight
+          between 0 and 1, with all weights summing to 1. A model with a high
+          AIC weight (close to 1) has strong support.
+        </p>
+
+        <h3>3. Predictor model</h3>
+        <p>
+          In addition to estimating participant-level discounting parameters,
+          researchers may wish to examine whether individual differences
+          (e.g., demographic variables, personality traits, group membership)
+          predict variability in the social discounting function. The predictor
+          model extends the base hyperbolic model by including
+          predictors/covariates on the discounting rate parameter
+          (<span class="var">logk</span>). Positive coefficients indicate
+          steeper discounting (less generosity); negative coefficients indicate
+          shallower discounting (greater generosity).
+        </p>
+        <div class="callout">
+          <p><strong>Tips.</strong> Modify predictors to match variables in your dataset. Predictors in the fixed-effects list (<code>logk ~ </code>) model individual differences in discounting rate, not baseline generosity (<span class="var">v0</span>). Ensure the number of starting values for <span class="var">logk</span> (<code>start = c(...)</code>) matches the number of predictors — the first value corresponds to the intercept of logk, followed by one value per predictor in the same order.</p>
+        </div>
+
+        <h3>Common issues and troubleshooting</h3>
+        <p>
+          When fitting nonlinear mixed-effects models, convergence issues are
+          relatively common. Singularity and non-convergence errors are often
+          related and can arise from similar underlying causes (e.g., poor
+          starting values, overly complex models, or limited variability in the
+          data).
+        </p>
+
+        <h4> 1. Singularity Error</h4>
+        <p>
+          Example Error:
+        </p>
+
+        <div class="curve-wrap" style="text-align: center;">
+          <img src="Singularity Error.png" style="max-width: 700px; width: 100%; height: auto;">
+        </div>
+
+        <p>
+          This indicates that the model has reached an unstable or undefined solution during estimation. 
+          This can occur due to numerical issues (e.g., poor starting values) or because the model is too complex relative to the data.
+        </p>
+
+        <h4> 2. Non-convergence (Maximum Iterations Reached)</h4>
+        <p>
+          Example Error:
+        </p>
+
+        <div class="curve-wrap" style="text-align: center;">
+          <img src="Non-convergence Error.png" style="max-width: 700px; width: 100%; height: auto;">
+        </div>
+
+        <p>
+          This means the model failed to find stable parameter estimated within the allowed number of iterations. 
+        </p>
+
+        <div class="card tint">
+          <div class="card-label">Common causes</div>
+          <ul style="margin: 0">
+            <li>Poor starting values for model parameters (<span class="var">v0</span>, <span class="var">logk</span>)</li>
+            <li>Overly complex random-effects structure (e.g., random slopes for logk)</li>
+            <li>Limited variability in participant responses (e.g., always choosing 0 or the maximum)</li>
+            <li>Too few observations per participant (especially in the Short Form)</li>
+            <li>Predictors on very different scales (in predictor models)</li>
+          </ul>
+        </div>
+        <div class="card tint">
+          <div class="card-label">Recommended solutions</div>
+          <ul style="margin: 0">
+            <li><strong>Adjust starting values:</strong> choose initial estimates close to plausible values (<span class="var">v0</span> near mean <code>max_rating</code>, <span class="var">logk</span> near −1). Iteratively adjusting starting values is standard practice.</li>
+            <li><strong>Iteration limits:</strong> increase <code>msMaxIter</code> or adjust <code>tol</code> if convergence is not achieved.</li>
+            <li><strong>Simplify random effects:</strong> consider removing non-essential random slopes if convergence fails.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section id="logk-auc" class="block">
+        <div class="section-head">
+          <span class="section-num">09</span>
+          <h2>Extraction of logk and AUC</h2>
+        </div>
+        <p>
+          Once the hyperbolic model has been fitted, the next step is to
+          extract participant-level estimates of social discounting. Two
+          commonly reported metrics are:
+        </p>
+        <ol>
+          <li><span class="var">logk</span> — the model-based social discounting rate</li>
+          <li><strong>AUC</strong> (Area Under the Curve) — a model-free measure of overall generosity</li>
+        </ol>
+        <p>The procedures are the same for both the original task and the Short Form.</p>
+
+        <h3>Extracting individual logk values</h3>
+        <p>The hyperbolic model estimates two types of parameters:</p>
+        <ul>
+          <li><strong>Fixed effects</strong> — population-average estimates of <span class="var">v0</span> (baseline generosity) and <span class="var">logk</span> (discounting rate)</li>
+          <li><strong>Random effects</strong> — participant-level deviations from these averages</li>
+        </ul>
+        <p>To obtain participant-specific logk values:</p>
+        <ol>
+          <li>Extract the random effect deviations for <span class="var">logk</span>. These represent how much each participant's discounting rate differs from the population average.</li>
+          <li>Repeat these random effects for each row in the dataset so that they align with the number of social distances per participant.</li>
+          <li>Extract the fixed-effect estimate for <span class="var">logk</span>.</li>
+          <li>Combine the fixed effect and the random effect to produce the final participant-level <span class="var">logk</span> values.</li>
+        </ol>
+
+        <h3>Extracting Area Under the Curve (AUC)</h3>
+        <p>AUC provides a model-free measure of overall generosity:</p>
+        <ol>
+          <li>For each participant, the amount willing to forgo is plotted across all social distances.</li>
+          <li>The area under this curve is calculated using numerical integration (trapezoidal method).</li>
+          <li>AUC is normalized by the maximum possible area to yield a value between 0 and 1. Higher AUC values indicate greater generosity and shallower social discounting; lower AUC values indicate steeper discounting.</li>
+        </ol>
+        <p>
+          Unlike logk, AUC does not rely on fitting a specific model and
+          provides a complementary perspective on social valuation across
+          distances.
+        </p>
+        <div class="callout">
+          <p><strong>Summary.</strong> <span class="var">logk</span> captures how rapidly generosity declines with social distance (model-based). AUC captures overall generosity across all social distances (model-free). Both metrics are useful for individual-differences analyses, allowing researchers to relate social discounting behavior to personality traits, demographic variables, or other outcomes.</p>
+        </div>
+      </section>
+
+      <section id="visualization" class="block">
+        <div class="section-head">
+          <span class="section-num">10</span>
+          <h2>Visualization</h2>
+        </div>
+        <p>
+          Visualizing participants' generosity across social distance provides
+          an intuitive representation of social discounting behavior. The plot
+          shows the proportion of the maximum amount participants are willing
+          to forgo at each social distance.
+        </p>
+
+        <div class="curve-wrap" style="text-align: center;">
+          <a href = "https://www.nature.com/articles/s44271-025-00353-z" target = "_blank" rel = "noopener noreferrer">
+            <img src="Figure1.png" alt="Social discounting curves" style="max-width: 700px; width: 100%; height: auto;">
+          </a>
+          <div class="caption">From <a href="#nero2025" class="cite">Nero et al., 2025</a>. Social discounting curves with standard error for the current study (control and high psychopathy group) and (<a href="#vekaria2017" class="cite">Vekaria et al., 2017</a> (controls). The high psychopathy group had higher discounting than both control groups, with control groups overlapping. The shaded region represents the standard error around the mean.</div>
+        </div>  
+
+        <h3>Key features of the visualization</h3>
+        <ol>
+          <li><strong>Scaling.</strong> Values are expressed as a proportion of the maximum possible amount (percentage). This ensures curves are directly comparable across participants, groups, and task versions.</li>
+          <li><strong>Group comparisons (optional).</strong> If a grouping variable (e.g., experimental condition or demographic group) is present, separate curves are plotted for each group. Shaded ribbons represent ±1 standard error of the mean, providing a visual sense of variability within each group.</li>
+          <li><strong>Single curve (no groups).</strong> If no grouping variable is present, a single curve is plotted with a shaded ribbon representing ±1 standard error across all participants.</li>
+          <li><strong>Interpretation.</strong> Steeper declines in the curve reflect steeper social discounting (participants give less as social distance increases). Flatter curves indicate shallower discounting. The curve can also be compared visually to individual or group-level logk estimates.</li>
+        </ol>
+        <p>
+          This visualization is useful both for descriptive reporting and for
+          checking whether the hyperbolic model captures the overall pattern of
+          generosity in the sample.
+        </p>
+      </section>
+
+      <section id="references" class="block">
+        <div class="section-head">
+          <span class="section-num">11</span>
+          <h2>References</h2>
+        </div>
+      
+        <div class="references">
+
+          <p id="amormino2025">Amormino, P., Gao, J., Li, P., Induni, S., Amar, S., Balabanis, K., Burt, A., Dockray, K., Doherty, H., Dube, N., Janney, L., Kales, E., King, I., Kronthal, E., Lee, B., Regan, E., Romero, I., Jones, B. A., Seaman, K. L., & Marsh, A. A. (2025). Social discounting and anti-/pro-sociality: A meta-analysis and (short-form) replication. Personality and Individual Differences, 247, 113447. 
+          <a href="https://doi.org/10.1016/j.paid.2025.113447" target="_blank" rel="noopener noreferrer">https://doi.org/10.1016/j.paid.2025.113447</a></p>
+            
+          <p id="amormino2026">Amormino, P., Graue, A. E., Marsh, A. A., & Wilson, A. V. (2026). Development and Validation of the Social Discounting Task: Short Form. Social Psychological and Personality Science, 17(4), 536–543. 
+          <a href="https://doi.org/10.1177/19485506251328706" target="_blank" rel="noopener noreferrer">https://doi.org/10.1177/19485506251328706</a></p>
+            
+          <p id="jones2006">Jones, B., & Rachlin, H. (2006). Social Discounting. Psychological Science, 17(4), 283–286.
+          <a href="https://doi.org/10.1111/j.1467-9280.2006.01699.x" target="_blank" rel="noopener noreferrer">https://doi.org/10.1111/j.1467-9280.2006.01699.x</a></p>
+
+          <p id="jones2009">Jones, B., & Rachlin, H. (2009). Delay, Probability, and Social Discounting in A Public Goods Game. Journal of the Experimental Analysis of Behavior, 91(1), 61–73. 
+          <a href="https://doi.org/10.1901/jeab.2009.91-61" target="_blank" rel="noopener noreferrer">https://doi.org/10.1901/jeab.2009.91-61</a></p>
+            
+          <p id="malesza2021">Malesza, M., & Kalinowski, K. (2021). Willingness to share, impulsivity and the Dark Triad traits. Current Psychology, 40(8), 3888–3896. 
+          <a href="https://doi.org/10.1007/s12144-019-00351-5" target="_blank" rel="noopener noreferrer">https://doi.org/10.1007/s12144-019-00351-5</a></p>
+            
+          <p id="nero2025">Nero, N., Dressel, M., Amormino, P., Freeburg, P., Somers, M., Poplinski, L., Duhamel, K., Alvarez-Toro, V., & Marsh, A. A. (2025). Adults with more severe psychopathy in the community show increased social discounting. Communications Psychology, 3(1), 175. 
+          <a href="https://doi.org/10.1038/s44271-025-00353-z" target="_blank" rel="noopener noreferrer">https://doi.org/10.1038/s44271-025-00353-z</a></p>
+            
+          <p id="rhoads2023">Rhoads, S. A., O’Connell, K., Berluti, K., Ploe, M. L., Elizabeth, H. S., Amormino, P., Li, J. L., Dutton, M. A., VanMeter, A. S., & Marsh, A. A. (2023). Neural responses underlying extraordinary altruists’ generosity for socially distant others. PNAS Nexus, 2(7). 
+          <a href="https://doi.org/10.1093/pnasnexus/pgad199" target="_blank" rel="noopener noreferrer">https://doi.org/10.1093/pnasnexus/pgad199</a></p>
+            
+          <p id="romanowich2021">Romanowich, P., Igaki, T., Yamagishi, N., & Norman, T. (2021). Differential Associations between Risky Cell-Phone Behaviors and Discounting Types. The Psychological Record, 71(2), 199–209. 
+          <a href="https://doi.org/10.1007/s40732-020-00446-7" target="_blank" rel="noopener noreferrer">https://doi.org/10.1007/s40732-020-00446-7</a></p>
+            
+          <p id="sharp2012">Sharp, C., Barr, G., Ross, D., Bhimani, R., Ha, C., & Vuchinich, R. (2012). Social Discounting and Externalizing Behavior Problems in Boys. Journal of Behavioral Decision Making, 25(3), 239–247. 
+          <a href="https://doi.org/10.1002/bdm.719" target="_blank" rel="noopener noreferrer">https://doi.org/10.1002/bdm.719</a></p>
+            
+          <p id="sherman2017">Sherman, E. D., & Lynam, D. R. (2017). Psychopathy and low communion: An overlooked and underappreciated core feature. Personality Disorders: Theory, Research, and Treatment, 8(4), 309–318. 
+          <a href="https://doi.org/10.1037/per0000203" target="_blank" rel="noopener noreferrer">https://doi.org/10.1037/per0000203</a></p>
+            
+          <p id="vekaria2017">Vekaria, K. M., Brethel-Haurwitz, K. M., Cardinale, E. M., Stoycos, S. A., & Marsh, A. A. (2017). Social discounting and distance perceptions in costly altruism. Nature Human Behaviour, 1(5). 
+          <a href="https://doi.org/10.1038/s41562-017-0100" target="_blank" rel="noopener noreferrer">https://doi.org/10.1038/s41562-017-0100</a></p>
+        </div>
+      </section>
+
+      <footer class="foot">
+        <p>
+          Correspondence concerning this article should be addressed to Naomi
+          Nero, Department of Psychology, Georgetown University, White Gravenor
+          Hall, Washington, DC 20057, United States. Email:
+          <a href="mailto:nn444@georgetown.edu">nn444@georgetown.edu</a>.
+        </p>
+        <p style="color: var(--fg-faint); font-size: 0.78rem;">
+          The Social Discounting Task Manual · Version 1.0 · April 2026
+        </p>
+      </footer>
+    </main>
+  </div>
+
+  <script>
+    (function () {
+      const links = Array.from(document.querySelectorAll('aside.rail nav a'));
+      const map = new Map();
+      links.forEach(a => {
+        const id = a.getAttribute('href').slice(1);
+        const el = document.getElementById(id);
+        if (el) map.set(el, a);
+      });
+      const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            links.forEach(a => a.removeAttribute('aria-current'));
+            const active = map.get(entry.target);
+            if (active) active.setAttribute('aria-current', 'true');
+          }
+        });
+      }, { rootMargin: '-20% 0px -70% 0px', threshold: 0 });
+      map.forEach((_, section) => observer.observe(section));
+    })();
+  </script>
+
+  <script>
+    function highlightReference() {
+      document.querySelectorAll('.references p').forEach(p => {
+        p.classList.remove('highlight');
+      });
+
+      const id = window.location.hash.replace('#', '');
+      const el = document.getElementById(id);
+
+      if (el) {
+        el.classList.add('highlight');
+
+        setTimeout(() => {
+          el.classList.remove('highlight');
+        }, 3000);
+      }
+    }
+
+    window.addEventListener('hashchange', highlightReference);
+    window.addEventListener('load', highlightReference);
+  </script>
+</body>
+</html>
