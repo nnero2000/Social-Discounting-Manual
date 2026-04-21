@@ -24,14 +24,12 @@ The manual is intended to be used alongside the provided **R Markdown script**, 
 
 ### Social Discounting Manual
 
-- PDF manual containing:
+- PDF manual designed to be used alongside the R Markdown scriptcontaining:
   - Conceptual overview  
   - Task design and structure  
   - Data cleaning procedures  
   - Analysis workflows  
-  - Visualization guidelines  
-
-- Designed to be used alongside the R Markdown script  
+  - Visualization guidelines    
 
 - 🌐 HTML version available via GitHub Pages:  
   [View Social Discounting Manual](https://nnero2000.github.io/Social-Discounting-Manual/Manual/Social%20Discounting%20Manual.html)
