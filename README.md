@@ -32,7 +32,7 @@ The manual is intended to be used alongside the provided **R Markdown script**, 
   - Visualization guidelines    
 
 - 🌐 HTML version available via GitHub Pages:  
-  [View Social Discounting Manual]([https://nnero2000.github.io/Social-Discounting-Manual.html](https://nnero2000.github.io/Social-Discounting-Manual/))
+ [View Social Discounting Manual](https://nnero2000.github.io/Social-Discounting-Manual/)
 
 ### Data Collection
 
