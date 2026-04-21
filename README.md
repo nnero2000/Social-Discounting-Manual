@@ -1,8 +1,12 @@
 # Social Discounting Task: Data Collection & Analysis Toolkit
 
-This repository provides resources for administering, processing, and analyzing data from the **Social Discounting Task** and the **Social Discounting Task Short Form**.
-
-It is designed to support **transparent, reproducible behavioral research** by integrating task materials, data pipelines, and detailed documentation in one place.
+This repository provides resources for administering, processing, and analyzing data from the **Social Discounting Task** and the **Social Discounting Task Short Form** by including:
+- Social Discounting Manual (conceptual and methodological guidance)
+- Qualtrics survey templates
+- Shiny applications for data collection
+- R Markdown analysis pipeline
+ 
+It is designed to support **transparent, reproducible behavioral research** by providing task materials, data cleaning and analysis pipelines, and detailed documentation in one place.
 
 ---
 
