@@ -106,7 +106,7 @@ Amormino, P., Gao, J., Li, P., Induni, S., Amar, S., Balabanis, K., Burt, A., Do
 
 ## License
 
-*(Add your license here, e.g., MIT, CC-BY, etc.)*  
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 ---
 
