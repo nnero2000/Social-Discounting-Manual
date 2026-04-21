@@ -1,0 +1,1397 @@
+---
+title: "Social Discounting Package"
+author: "Naomi Nero"
+date: "2026-04-21"
+output: html_document
+---
+
+
+**Version 1.0** \ 
+
+
+Correspondence concerning this manual and package should be addressed to Naomi Nero, Department of Psychology, Georgetown University, White Gravenor Hall, Washington, DC 20057, United States. 
+
+Email: nn444@georgetown.edu
+
+
+This script cleans and analyzes the Original Social Discounting Task (Long Form) data and Social Discounting Task Short-Form exported. Data can be collected using the provided Qualtrics templates or the Shiny App code, both of which save the data and variable names in a compatible format to be analyses with this script. Further explanation of the data preparation, cleaning, and analysis steps are explains in the accompanying manual. 
+
+# Set up
+This section loads all packages required for data cleaning, reshaping, and modeling.
+
+```{r setup-options, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  warning = FALSE,
+  message = FALSE
+)
+
+library(dplyr)
+library(tidyr)
+library(nlme)      # Hyperbolic model
+library(papaja)    # APA-style plots
+library(ggplot2)
+library(pracma)    # For AUC calculation (trapz)
+library(AICcmodavg) # for AIC weights
+library(purrr)
+
+rm(list=ls())
+
+```
+
+
+# User Inputs
+It assumes data were exported from Qualtrics as a CSV file using **Export values** (not Export labels).
+
+Modify your paths and filenames for your dataset. \ 
+
+- path: folder containing the Qualtrics CSV files  
+- sd_long: filename for the long-form task data  
+- sd_short: filename for the short-form task data
+```{r user-input, include = FALSE, message = FALSE}
+# Path to folder containing the Qualtrics export
+path <- "/Users/Documents/Social-Discounting-Manual/"
+
+
+# Long form data file name
+sd_long <- "SDlongform_exampledata.csv"
+
+# Short form data file name
+sd_short <- "SDshortform_exampledata.csv"
+```
+
+# SD LONG FORM
+This is the data cleaning and analysis pipeline for the original Social Discounting Task
+
+## Import Data
+This section imports the Qualtrics data file.
+```{r SDL import-data}
+data_wide <- read.delim(
+  file = paste0(path, "/", sd_long),
+  sep = ",",
+  quote = "\"",
+  header = TRUE
+)
+```
+
+
+
+## Expected csv variable names
+This analysis script assumes that the csv export contains the following variables.
+
+**Subject identifier** \ 
+
+- subnum: unique participant ID (participants without a value in subnum will be removed during data cleaning)
+ 
+
+**Social Discounting Trial name structure** \ 
+
+Each trial is named using the following structure: sd[distance]_[trial] \ 
+
+Here is a complete list of required variables \ 
+
+- sd1_1 – sd1_9
+- sd2_1 – sd2_9
+- sd5_1 – sd5_9
+- sd10_1 – sd10_9
+- sd20_1 – sd20_9
+- sd50_1 – sd50_9
+- sd100_1 – sd100_9
+
+**Response coding** \ 
+
+Responses should be exported from Qualtrics using Export values. \ 
+For trials 1-8, expected coding is: \ 
+
+- 0 = kept money \ 
+- Positive value (80-10) = shared money (amount offered to keep - $75)
+
+On trial 9 (keep 75 or split 75/75), the expected coding is: \ 
+
+- -5 = kept money 
+- 0 = shared money
+
+Check to make sure your data has all of the needed column/column names
+```{r SDL colnames}
+names(data_wide)
+```
+
+## Data Cleaning
+The following steps convert the raw Qualtrics export into participant-level indifference points that can be used for modeling.
+
+### Reshape Data 
+This removes rows that do not contain a participant ID.
+The Social Discounting task contains multiple trials per distance level.  
+This step converts the dataset from **wide format to long format**, which allows trial-level processing. After this step:
+
+- `trial` contains the trial name (e.g., sd1_1, sd10_5)
+- `choice` contains the participant’s response.
+```{r SDL reshape_long}
+data_wide2 <- data_wide[!is.na(data_wide$subnum), ]
+
+longer_numeric <- pivot_longer(
+  data_wide2,
+  cols = c(
+    "sd1_1","sd1_2","sd1_3","sd1_4","sd1_5","sd1_6","sd1_7","sd1_8","sd1_9",
+    "sd2_1","sd2_2","sd2_3","sd2_4","sd2_5","sd2_6","sd2_7","sd2_8","sd2_9",
+    "sd5_1","sd5_2","sd5_3","sd5_4","sd5_5","sd5_6","sd5_7","sd5_8","sd5_9",
+    "sd10_1","sd10_2","sd10_3","sd10_4","sd10_5","sd10_6","sd10_7","sd10_8","sd10_9",
+    "sd20_1","sd20_2","sd20_3","sd20_4","sd20_5","sd20_6","sd20_7","sd20_8","sd20_9",
+    "sd50_1","sd50_2","sd50_3","sd50_4","sd50_5","sd50_6","sd50_7","sd50_8","sd50_9",
+    "sd100_1","sd100_2","sd100_3","sd100_4","sd100_5","sd100_6","sd100_7","sd100_8","sd100_9"
+  ),
+  names_to = "trial",
+  values_to = "choice"
+)
+```
+
+### Split Trial Information
+Each trial name contains two pieces of information:
+
+- social distance (e.g., sd100)
+- trial number (e.g., 9)
+
+This step separates these into two columns:
+
+- `distance` 
+- `amount1`
+
+REFERENCE FOR AMOUNTS: This table shows the amount offered for the participant to keep.  
+The alternative option is always a $75 / $75 split. \ 
+
+- 1 - 155
+- 2 - 145
+- 3 - 135
+- 4 - 125
+- 5 - 115
+- 6 - 105
+- 7 - 95
+- 8 - 85
+- 9 - 75
+```{r SDL split-trial-info}
+split_data <- separate(
+  longer_numeric,
+  trial,
+  into = c("distance", "amount1"),
+  sep = "_"
+)
+
+```
+
+### Recode Choice Values
+Due to how the task is coded in Qualtrics:
+
+For most trials: \ 
+
+- 0 = participant kept the money
+
+On the final trial: \ 
+
+- -5 = participant kept the money
+- 0 = participant shared
+
+To correctly identify the crossover point, we temporarily convert:
+
+-5 → 5
+
+This ensures that if a participant keeps money on all trials, the final trial is selected as their maximum amount willing to forgo (we select the most positive number). \ 
+
+Later, this value is converted back to -5 to distinguish participants who kept money on all trials whose maximum amount willing to forgo will be 0.
+
+```{r SDL recode-choice}
+split_data$choice <- ifelse(split_data$choice == -5, 5, split_data$choice)
+```
+
+### Remove Invalid/Missing Responses
+This step:
+
+- removes missing responses
+- ensures `choice` values are numeric
+
+Then we select rows where choice is above or equal to 0 (why we changed -5 to 5) to highlight valid responses
+```{r SDL filter-valid-trials}
+filtered_data <- split_data[!is.na(as.numeric(split_data$choice)), ]
+filtered_data <- subset(filtered_data, choice == 0 | choice > 0)
+
+```
+
+### Convert Social Distance to Numeric
+The distance labels (sd1, sd2, etc.) are converted to numeric values (1, 2, etc), creating a new column called "Distance"
+```{r SDL recode-distance}
+max_ratings1 <- filtered_data %>%
+  dplyr::select(-any_of("X")) %>% 
+  mutate(
+    Distance = case_when(
+      distance == "sd1" ~ 1,
+      distance == "sd2" ~ 2,
+      distance == "sd5" ~ 5,
+      distance == "sd10" ~ 10,
+      distance == "sd20" ~ 20,
+      distance == "sd50" ~ 50,
+      distance == "sd100" ~ 100,
+      TRUE ~ 0
+    )
+  )
+
+```
+### Compute Indifference Points
+We calculate the **maximum amount participants were willing to forgo** for each social distance by identifying the crossover point where participants switch from keeping money to sharing (indifference point). 
+
+First, we group decisions by Distance and select the **maximum choice value** at each social distance (the most positive number). This selects the **first** time the participant crosses over from keep to share. This maximum rating/willing to forgo is put in a new column called max_rating. Then we left_join all of the other predictor variables (if you have any other covaraites)
+
+Then, in the max_rating column, we convert 5 (kept at the last trial) back to -5
+```{r SDL compute-indifference}
+trial_filtered_data <- max_ratings1 %>%
+  group_by(subnum, Distance, distance) %>%
+  summarise(max_rating = max(choice), .groups = "drop") %>%
+  left_join(
+    max_ratings1 %>%
+      distinct(subnum, .keep_all = TRUE) %>%
+      dplyr::select(-Distance, -distance),
+    by = "subnum"
+  )
+trial_filtered_data$max_rating <- ifelse(trial_filtered_data$max_rating == 5, -5, trial_filtered_data$max_rating)
+```
+
+### Data Check
+This table shows the distribution of indifference points across participants.
+
+These values reflect the maximum amount participants were willing to forgo at each social distance.
+
+Interpretation:
+
+- 80 = shared on the first trial
+- 70–10 = crossover occurred earlier in the task
+- 0 = shared on the final trial
+- -5 = kept money on all trials
+```{r SDL data-check}
+table(trial_filtered_data$max_rating)
+```
+
+
+## Missing Data - Data Cleaning Alternative
+The standard social discounting pipeline identifies indifference points by locating the crossover trial where participants switch from keeping money to sharing. This requires complete data within each social distance. However, in some context (neuroimaging studies, online data collection that doesn't have request response), participants may have a lot of missing data on individual trials and you may not want to pairwise delete.To address this, we use a trial-level logistic regression approach, which uses all available trials to model choices directly and estimate the indifference point.
+
+### Reshape Data and Split Trial Information
+```{r SDL reshape_long2, eval = FALSE}
+data_wide2 <- data_wide[!is.na(data_wide$subnum), ]
+
+longer_numeric <- pivot_longer(
+  data_wide2,
+  cols = c(
+    "sd1_1","sd1_2","sd1_3","sd1_4","sd1_5","sd1_6","sd1_7","sd1_8","sd1_9",
+    "sd2_1","sd2_2","sd2_3","sd2_4","sd2_5","sd2_6","sd2_7","sd2_8","sd2_9",
+    "sd5_1","sd5_2","sd5_3","sd5_4","sd5_5","sd5_6","sd5_7","sd5_8","sd5_9",
+    "sd10_1","sd10_2","sd10_3","sd10_4","sd10_5","sd10_6","sd10_7","sd10_8","sd10_9",
+    "sd20_1","sd20_2","sd20_3","sd20_4","sd20_5","sd20_6","sd20_7","sd20_8","sd20_9",
+    "sd50_1","sd50_2","sd50_3","sd50_4","sd50_5","sd50_6","sd50_7","sd50_8","sd50_9",
+    "sd100_1","sd100_2","sd100_3","sd100_4","sd100_5","sd100_6","sd100_7","sd100_8","sd100_9"
+  ),
+  names_to = "trial",
+  values_to = "choice"
+)
+
+split_data <- separate(
+  longer_numeric,
+  trial,
+  into = c("distance", "amount1"),
+  sep = "_"
+)
+
+```
+
+### Recode Choice Values \ 
+Here we recode the amount1 column to be amount_value which reflects the amount of money forgone when choosing to share, such that higher values correspond to greater amount forgone. We also recode the choice column to be binary where 0 is keep and 1 is share.
+```{r SDL filter-valid-trials2, eval = FALSE}
+split_data$choice <- as.numeric(split_data$choice)
+
+logit_data <- split_data %>%
+  mutate(
+    amount1 = as.numeric(amount1),
+    
+    # Convert trial number to actual dollar values
+    amount_value = case_when(
+      amount1 == 1 ~ 80,
+      amount1 == 2 ~ 70,
+      amount1 == 3 ~ 60,
+      amount1 == 4 ~ 50,
+      amount1 == 5 ~ 40,
+      amount1 == 6 ~ 30,
+      amount1 == 7 ~ 20,
+      amount1 == 8 ~ 10,
+      amount1 == 9 ~ 0
+    ),
+    
+    Distance = case_when(
+      distance == "sd1" ~ 1,
+      distance == "sd2" ~ 2,
+      distance == "sd5" ~ 5,
+      distance == "sd10" ~ 10,
+      distance == "sd20" ~ 20,
+      distance == "sd50" ~ 50,
+      distance == "sd100" ~ 100,
+      TRUE ~ 0
+    ),
+    
+    # Recode choice: 0 = keep, 1 = share
+    choice_binary = case_when(
+      amount1 == 9 & choice == -5 ~ 0,
+      amount1 == 9 & choice == 0 ~ 1,
+      
+      amount1 != 9 & choice == 0 ~ 0,
+      amount1 != 9 & choice > 0 ~ 1
+    )
+  )
+```
+
+### Estimate Indifference Point \ 
+Here we estimate indifference points using a trial-level logistic regression model for each participant at each social distance. This approach uses all available observed trials rather than relying on a single crossover point.
+
+Participants with no variability in responses (i.e., always choosing to keep or always choosing to share) are assigned boundary values of the task range, as logistic regression cannot be reliably estimated in the absence of response variability. Additionally, the indifference point for participants with fewer than 3 responses for a social distance are not estimated. We model the probability of choosing to share (choice_binary = 1) as a function of the amount of money forgone (amount_value). The resulting function describes how decision probability changes as a function of increasing monetary cost. The indifference point is defined as the value of amount_value at which the participant is equally likely to keep or share the reward (i.e., P(share) = 0.5). This is computed analytically from the fitted logistic regression coefficients.
+```{r estimate-ind, eval = FALSE}
+indifference_data <- logit_data %>%
+  group_by(subnum, Distance) %>%
+  group_modify(~{
+    
+    df <- .x
+    
+    # Remove missing rows (handled automatically, but explicit here)
+    df <- df %>% filter(!is.na(choice_binary), !is.na(amount_value))
+    
+    # Handle edge cases
+    if (nrow(df) < 3) {
+      return(tibble(max_rating = NA_real_))
+    }
+    
+    if (all(df$choice_binary == 1)) {
+      return(tibble(max_rating = 80))  # always kept
+    }
+    
+    if (all(df$choice_binary == 0)) {
+      return(tibble(max_rating = 0))    # always shared
+    }
+    
+    # Fit logistic regression
+    fit <- glm(choice_binary ~ amount_value,
+               family = binomial,
+               data = df)
+    
+    coefs <- coef(fit)
+    
+    # Compute indifference point (P = 0.5)
+    v <- -coefs[1] / coefs[2]
+    
+    tibble(max_rating = v)
+  }) %>%
+  ungroup()
+
+trial_filtered_data <- indifference_data %>%
+  left_join(
+    logit_data %>%
+      distinct(subnum, .keep_all = TRUE) %>%
+      dplyr::select(-Distance, -distance, -amount1, -amount_value, -choice_binary, -choice),
+    by = "subnum"
+  )
+
+summary(trial_filtered_data$max_rating)
+```
+
+
+## Analysis
+This code uses the cleaned data to run the hyperbolic model, extract individual logk values and calculate individual AUC values
+
+### Hyperbolic Model
+The Social Discounting Task is typically analyzed using a hyperbolic discounting model, which estimates how generosity decreases as social distance increases.
+
+The model estimates two parameters:
+
+- v0: baseline generosity (at social distance = 0)
+- logk: social discounting rate
+
+More negative logk values indicate steeper discounting across social distance.
+
+#### Model 1: Base model (no predictors)
+This model estimates the hyperbolic social discounting function without including any predictors. It is used to obtain **participant-level discounting parameters**, including logk, which reflects the rate of social discounting.
+In most cases, researchers should run this model first and extract the **individual logk estimates** from it. These logk values can then be used in subsequent analyses (e.g., regression models) that include covariates or group variables.
+Most users should run this model.
+
+```{r SDL base-model}
+set.seed(1234)
+base_model<-nlme((as.numeric(max_rating))~v0/(1+exp(logk)*Distance), 
+                      fixed=list(v0~1,logk~1),
+                      random=v0+logk~1|subnum,
+                      data=trial_filtered_data, 
+                      start=c(v0=65
+                              , logk=-1), 
+                      control=c(nlmeControl(tol=.1, msMaxIter=5000)),
+                      na.action = na.omit)
+summary(base_model)
+
+```
+
+##### Comparison Models
+We should compare the AIC from a hyperbolic model to that of an exponential and linear model to make sure it is the best fit. Below is the code for an exponential model and for a linear model.
+```{r SDL alt models base}
+set.seed(1234)
+exponential_model_base<-nlme((as.numeric(max_rating))~v0*exp(-k*Distance), 
+                 fixed=list(v0~1,k~1),
+                 random=v0+k~1|subnum,
+                 data=trial_filtered_data, 
+                 start=c(v0=55, logk=.01), 
+                 control=c(nlmeControl(tol=.1, msMaxIter=1000)),
+                 na.action = na.omit)
+summary(exponential_model_base)
+
+set.seed(1234)
+linear_model_base<-nlme((as.numeric(max_rating))~v0 +k*Distance,
+                fixed=list(v0~1, k~1),
+                random=v0+k~1|subnum,
+                data=trial_filtered_data,
+                start=c(v0=55,k=-5), 
+                control=c(nlmeControl(tol=.1, msMaxIter=1000)))
+
+summary(linear_model_base)
+```
+
+##### AIC Weights
+After fitting the hyperbolic, exponential, and linear models to the Social Discounting Task data, we compare their relative fit using Akaike’s Information Criterion (AIC). AIC balances model fit and complexity, with lower values indicating better-fitting models while penalizing unnecessary parameters.
+
+Two complementary approaches are shown here:
+
+Using aictab() (AICcmodavg package):
+
+- Automatically computes AIC, delta AIC (difference from the best model), and AIC weights (relative likelihood that each model is the best).
+- Produces a table ranking models by support from the data.
+
+Manual extraction:
+
+- Extracts AIC for each model using AIC().
+- Computes delta AIC as the difference from the lowest AIC.
+- Calculates AIC weights using 
+- weight
+⁡
+Interpretation: \ 
+Delta AIC (ΔAIC): ΔAIC represents how much worse a model fits relative to the best-fitting model (i.e., the model with the lowest AIC). It is calculated by subtracting the lowest AIC value across all candidate models from the AIC of each model. In most cases, the hyperbolic model will have the lowest AIC, meaning that the exponential and linear models will have positive ΔAIC values relative to the hyperbolic model. In this case, subtract AIC from hyperbolic model from that of exponential or linear model. \ 
+ΔAIC < 2 → substantial support (models are essentially equivalent)\ 
+ΔAIC 4–7 → considerably less support \ 
+ΔAIC > 10 → essentially no support (lower AIC is a better fit model) \ 
+
+AIC weights: AIC weights represent the relative likelihood that each model is the best among the candidate models
+
+- An AIC weight of 1 for the hyperbolic model means it is overwhelmingly the best-fitting model compared to the exponential and linear alternatives.
+```{r SDL AIC_base}
+models_base <- list(base_model, exponential_model_base, linear_model_base)
+model.names_base <- c('hyperbolic', 'exponential', 'linear')
+aictab(cand.set = models_base, modnames = model.names_base)
+
+models_base <- list(hyperbolic = base_model,
+               exponential = exponential_model_base,
+               linear = linear_model_base)
+AICs_base <- sapply(models_base, AIC)
+delta_base <- AICs_base - min(AICs_base)
+weights_base <- exp(-0.5 * delta_base) / sum(exp(-0.5 * delta_base))
+weights_base
+
+AIC_table_base <- data.frame(
+  Model = names(AICs_base),
+  AIC = as.numeric(AICs_base),
+  Delta = delta_base,
+  Weight = weights_base
+)
+
+```
+##### Extract logk
+Below we extract individual logk values for each participant. 
+In most cases, logk values should be extracted from the base model (Model 1). This ensures that individual discounting estimates are derived directly from task behavior and are not influenced by predictors included in the hyperbolic model. These participant-level logk values can then be used in subsequent analyses (e.g., regression models with covariates).
+
+The code below combines the fixed effects and random effects to calculate participant-level logk estimates.
+
+**1. Extract Random and Fixed Effects and Combine** 
+
+This extracts the random effects from the model. These represent how much each participant’s parameters (v0 and logk) differ from the population average estimated by the model. Specifically, we extract the participant-level deviations specifically for the logk parameter and convert it to a vector.
+
+Because the dataset contains multiple rows per participant (one for each social distance), the participant-level random effect is repeated so that it matches the number of rows in the dataset.
+
+Then extract the fixed effect coefficient for logk estimated by the model and converts it to numeric. 
+
+Lastly, we combined the fixed logk with the participant's random deviation to produce the final participant-level logk values and attach their participant IDs
+
+```{r SDL logk values1}
+logk_random_effects_base <- as.vector(ranef(base_model)[["logk"]])
+logk_random_effects_repeated_base <- rep(logk_random_effects_base, each = 7)  # match number of rows per participant
+
+logk_fixed_effects_base <- as.numeric(fixef(base_model)[grepl("logk", names(fixef(base_model)))])
+
+individual_logk_base <- logk_fixed_effects_base + logk_random_effects_repeated_base
+subnum_column <- trial_filtered_data$subnum
+```
+
+**2. Check length**
+
+This checks that the number of logk values matches the number of rows in the dataset before creating the final data frame.
+```{r SDL logk values2}
+length(subnum_column)
+length(individual_logk_base)
+```
+**3. Final Data Set**
+
+This creates a dataset (individual_logk_df_base) containing:
+
+- participant ID
+- estimated logk value
+```{r SDL logk values3}
+if (length(subnum_column) == length(individual_logk_base)) {
+  individual_logk_df_base <- data.frame(subnum = subnum_column, logk_base = individual_logk_base)
+  
+  # Sort the data frame by subnum
+  individual_logk_df_base <- individual_logk_df_base[order(individual_logk_df_base$subnum), ]
+  
+  # Display the first few rows of the result
+  head(individual_logk_df_base)
+} else {
+  stop("The lengths of subnum_column and individual_logk do not match.")
+}
+```
+
+##### Extracting AUC \ 
+Area under the curve (AUC) is computed using the trapezoidal method (trapz) across the observed social distance values (1, 2, 5, 10, 20, 50, 100). Because AUC is calculated over the actual range of x-values included in the task, the total span of the social distance axis is 100 − 1 = 99 units. The maximum possible AUC therefore corresponds to a participant consistently selecting the maximum forgone amount (80) across this range, yielding a value of 99 × 80 = 7,920. Observed AUC values were divided by 7,920 to yield a normalized index bounded between 0 and 1.
+```{r SDL AUC_base}
+# Keep only one row per participant
+individual_logk_df_base_unique <- individual_logk_df_base %>%
+  dplyr::distinct(subnum, .keep_all = TRUE)
+
+trial_filtered_data2 <- dplyr::left_join(
+  trial_filtered_data,
+  individual_logk_df_base_unique,
+  by = "subnum"
+)
+
+
+AUC_long <- trial_filtered_data2 %>%
+  group_by(subnum) %>%
+  summarise(AUC = trapz(as.numeric(Distance), as.numeric(max_rating))/7920, .groups = "drop") %>%
+  left_join(
+    trial_filtered_data2 %>%
+      dplyr::distinct(subnum, .keep_all = TRUE) %>%
+      dplyr::select(-max_rating, -Distance),  
+    by = "subnum"
+  )
+```
+
+#### Model 2: Model With Predictors (Optional)
+You may want to examine how participant characteristics predict differences in the hyperbolic discounting function itself.
+This model allows predictors (e.g., demographic variables, personality traits, or group membership) to explain variability in the discounting rate (logk).
+This step is **optional** and is typically used only if the goal is to test predictors **directly within the hyperbolic model**, rather than analyzing extracted logk values in a separate model.
+
+**Tips for using this model:**
+
+Modify the predictors in the example to match the variables available in your dataset.
+Ensure that the number of logk start values matches the number of covariates specified in fixed = list(...).
+```{r SDL hyperbolic-predictor-example, eval = FALSE}
+set.seed(1234)
+predictor_model<-nlme((as.numeric(max_rating))~v0/(1+exp(logk)*Distance), 
+                      fixed=list(v0~1,logk~as.numeric(Male)+as.numeric(age)+as.numeric(income)+as.numeric(FIT_sum)+as.numeric(group2)),
+                      random=v0+logk~1|subnum,
+                      data=trial_filtered_data, 
+                      start=c(v0=45
+                              , logk=-1, -1, -.01,.1,.01,-.1), 
+                      control=c(nlmeControl(tol=.1, msMaxIter=5000)),
+                      na.action = na.omit)
+summary(predictor_model)
+```
+
+
+##### Comparison Models
+We should compare the AIC from a hyperbolic model to that of an exponential and linear model to make sure it is the best fit. Below is the code for an exponential model and for a linear model.
+```{r SDL alt models pred, eval = FALSE}
+set.seed(1234)
+exponential_model_pred<-nlme((as.numeric(max_rating))~v0*exp(-k*Distance), 
+                 fixed=list(v0~1,k~as.numeric(Male)+as.numeric(age)+as.numeric(income_2)+as.numeric(FIT_sum)+as.numeric(group2)),
+                 random=v0+k~1|subnum,
+                 data=trial_filtered_data, 
+                 start=c(v0=55, logk=-1,-1,.1,.1,.1,-.1), 
+                 control=c(nlmeControl(tol=.1, msMaxIter=1000)),
+                 na.action = na.omit)
+summary(exponential_model_pred)
+
+set.seed(1234)
+linear_model_pred<-nlme((as.numeric(max_rating))~v0 +k*Distance,
+                fixed=list(v0~1, k~as.numeric(Male)+as.numeric(age)+as.numeric(income_2)+as.numeric(FIT_sum)+ as.numeric(group2)),
+                random=v0+k~1|subnum,
+                data=trial_filtered_data,
+                start=c(v0=55,k=-1, -1, -.01,.1,.1,-.1), 
+                control=c(nlmeControl(tol=.1)))
+summary(linear_model_pred)
+```
+
+##### AIC Weights
+After fitting the hyperbolic, exponential, and linear models to the Social Discounting Task data, we compare their relative fit using Akaike’s Information Criterion (AIC). AIC balances model fit and complexity, with lower values indicating better-fitting models while penalizing unnecessary parameters.
+
+Two complementary approaches are shown here:
+
+Using aictab() (AICcmodavg package):
+
+- Automatically computes AIC, delta AIC (difference from the best model), and AIC weights (relative likelihood that each model is the best).
+- Produces a table ranking models by support from the data.
+
+Manual extraction:
+
+- Extracts AIC for each model using AIC().
+- Computes delta AIC as the difference from the lowest AIC.
+- Calculates AIC weights using 
+- weight
+⁡
+Interpretation: \ 
+Delta AIC (ΔAIC): How much worse a model is compared to the best-fitting model.
+
+- ΔAIC < 2 → substantial support
+- ΔAIC 4–7 → considerably less support
+- ΔAIC > 10 → essentially no support
+
+AIC weights: The probability that a given model is the best among the candidates.
+
+- An AIC weight of 1 for the hyperbolic model means it is overwhelmingly the best-fitting model compared to the exponential and linear alternatives.
+```{r SDL AIC_pred, eval = FALSE}
+#aictab()
+models_pred <- list(predictor_model, exponential_model_pred, linear_model_pred)
+model.names_pred <- c('hyperbolic', 'exponential', 'linear')
+aictab(cand.set = models_pred, modnames = model.names_pred)
+
+
+
+#manual
+models_pred <- list(hyperbolic = predictor_model,
+               exponential = exponential_model_pred,
+               linear = linear_model_pred)
+
+AICs_pred <- sapply(models_pred, AIC)
+delta_pred <- AICs_pred - min(AICs_pred)
+weights_pred <- exp(-0.5 * delta_pred) / sum(exp(-0.5 * delta_pred))
+weights_pred
+AIC_table_pred <- data.frame(
+  Model = names(AICs_pred),
+  AIC = as.numeric(AICs_pred),
+  Delta = delta_pred,
+  Weight = weights_pred
+)
+
+```
+
+##### Extracting logk values
+Below we extract individual logk values for each participant. 
+In most cases, logk values should be extracted from the base model (Model 1). This ensures that individual discounting estimates are derived directly from task behavior and are not influenced by predictors included in the hyperbolic model. These participant-level logk values can then be used in subsequent analyses (e.g., regression models with covariates).
+
+The code below combines the fixed effects and random effects to calculate participant-level logk estimates.
+
+**1. Extract Random Effects** 
+
+This extracts the random effects from the model. These represent how much each participant’s parameters (v0 and logk) differ from the population average estimated by the model. Specifically, we extract the participant-level deviations specifically for the logk parameter and convert it to a vector.
+
+Because the dataset contains multiple rows per participant (one for each social distance), the participant-level random effect is repeated so that it matches the number of rows in the dataset.
+
+Then extract the fixed effect coefficient for logk estimated by the model and converts it to numeric. 
+
+```{r SDL pred logk values1, eval = FALSE}
+logk_random_effects_pred <- as.vector(ranef(predictor_model)[["logk.(Intercept)"]])
+logk_random_effects_repeated_pred <- rep(logk_random_effects_pred, each = 7)  
+
+logk_fixed_effects_pred <- as.numeric(fixef(predictor_model)[grepl("logk", names(fixef(predictor_model)))])
+```
+
+**2. Create Predictor Matrix from the Data**
+
+This creates a matrix containing the predictor variables (covariates) used in the model.
+This step is necessary because the model estimates how these predictors influence logk. The matrix is used to compute the predicted logk values for each observation.
+
+Important:
+
+- The predictors in this step must match those used in the hyperbolic model (in the same order!).
+```{r SDL pred logk values2, eval = FALSE}
+data_predictors <- model.matrix(~ as.numeric(Male) + as.numeric(age) + as.numeric(income_2) + as.numeric(FIT_sum)+ as.numeric(group2), 
+                                data = trial_filtered_data)
+```
+
+**3. Calculate the Fixed Component of Logk**
+
+This multiplies the predictor matrix by the fixed effect coefficients and converts it to a vector.
+This calculates the predicted logk value based on the predictors alone, before adding the participant-level deviation.
+```{r SDL pred logk values3, eval = FALSE}
+logk_fixed_part_pred <- data_predictors %*% logk_fixed_effects_pred
+logk_fixed_part_pred <- as.vector(logk_fixed_part_pred)
+```
+
+**4. Combine fixed and random effects**
+This step combines:
+
+- the predicted logk from the predictors
+- the participant’s random deviation
+- This produces the final participant-level logk values.
+
+Then it attaches participant IDs
+```{r SDL pred logk values4, eval = FALSE}
+individual_logk_pred <- logk_fixed_part_pred + logk_random_effects_repeated_pred
+subnum_column <- trial_filtered_data$subnum
+```
+
+**5. Check length**
+
+This checks that the number of logk values matches the number of rows in the dataset before creating the final data frame.
+```{r SDL pred logk values5, eval = FALSE}
+length(subnum_column)
+length(individual_logk_pred)
+```
+**6. Final Data Set**
+
+This creates a dataset (individual_logk_df) containing:
+
+- participant ID
+- estimated logk value
+```{r SDL pred logk values6, eval = FALSE}
+if (length(subnum_column) == length(individual_logk_pred)) {
+  individual_logk_df_pred <- data.frame(subnum = subnum_column, logk_pred = individual_logk_pred)
+  
+  # Sort the data frame by subnum
+  individual_logk_df_pred <- individual_logk_df_pred[order(individual_logk_df_pred$subnum), ]
+  
+  # Display the first few rows of the result
+  head(individual_logk_df_pred)
+} else {
+  stop("The lengths of subnum_column and individual_logk do not match.")
+}
+```
+
+##### Extracting AUC
+```{r SDL AUC_pred, eval = FALSE}
+individual_logk_df_pred_unique <- individual_logk_df_pred %>%
+  dplyr::distinct(subnum, .keep_all = TRUE)
+
+if (exists("AUC_long")) {
+  AUC_long <- dplyr::left_join(
+    AUC_long,
+    individual_logk_df_pred_unique,
+    by = "subnum"
+  )
+} else {
+  trial_filtered_data3 <- dplyr::left_join(
+    trial_filtered_data,
+    individual_logk_df_pred_unique,
+    by = "subnum"
+  )
+  
+  AUC_long <- trial_filtered_data3 %>%
+    group_by(subnum) %>%
+    summarise(AUC = trapz(as.numeric(Distance), as.numeric(max_rating))/8000, .groups = "drop") %>%
+    left_join(
+      trial_filtered_data3 %>%
+        dplyr::distinct(subnum, .keep_all = TRUE) %>%
+        dplyr::select(-max_rating, -Distance, distance, amount1, choice),
+      by = "subnum"
+    )
+}
+
+```
+
+
+### Graph of hyperbolic curve 
+This code generates a plot of participants’ generosity across social distance, scaled as a proportion of the maximum possible amount (percentage). The workflow automatically adapts based on whether the dataset contains a grouping variable (Group):
+
+- With "Group" present: The data are summarized separately for each group. The plot displays one line per group with shaded ribbons representing ±1 standard error of the mean. Groups are automatically labeled “Group1” and “Group2,” and color-coded for clarity.
+- Without "Group": The data are summarized across all participants, producing a single hyperbolic curve with its standard error ribbon.
+
+This approach ensures the graph works whether or not multiple groups are present, providing a clear visualization of social discounting behavior in your sample.
+
+```{r SDL graph, echo = FALSE}
+trial_filtered_data <- trial_filtered_data %>% mutate(percentage = as.numeric(max_rating) / 80)
+
+if("group2" %in% colnames(trial_filtered_data)) {
+  
+  summary_data <- trial_filtered_data %>%
+    group_by(Distance, group2) %>%
+    summarise(payment = mean(percentage, na.rm = TRUE),
+              ste = sd(percentage, na.rm = TRUE)/sqrt(n()),
+              .groups = "drop") %>%
+    mutate(Group = ifelse(group2 == 1, "Group1", "Group2"))
+  
+  colors_mapping <- c("Group2" = "coral", "Group1" = "darkturquoise")
+  
+} else {
+  
+  summary_data <- trial_filtered_data %>%
+    group_by(Distance) %>%
+    summarise(payment = mean(percentage, na.rm = TRUE),
+              ste = sd(percentage, na.rm = TRUE)/sqrt(n()),
+              .groups = "drop") %>%
+    mutate(Group = "All Participants")
+  
+  colors_mapping <- c("All Participants" = "darkturquoise")
+}
+
+# Plot curve
+SD_APAplot <- ggplot(summary_data, aes(x = Distance, y = payment, color = Group, fill = Group)) +
+  geom_line(linewidth = 1.5) +
+  geom_ribbon(aes(ymin = payment - ste, ymax = payment + ste), alpha = 0.3) +
+  labs(title = "Hyperbolic Social Discounting Curve",
+       x = "Social Distance",
+       y = "Proportion of $ Willing to Forgo") +
+  scale_color_manual(values = colors_mapping) +
+  scale_fill_manual(values = colors_mapping) +
+  scale_y_continuous(limits = c(0, 1)) +
+  theme_apa(base_size = 10, box = FALSE) +
+  theme(
+    text = element_text(family = "HelveticaNeue"),
+    axis.title.x = element_text(size = 10, margin = margin(t = 10)),
+    axis.title.y = element_text(size = 10, margin = margin(r = 10)),
+    axis.text = element_text(size = 10),
+    axis.line = element_line(colour = "black"),
+    panel.grid = element_blank(),
+    legend.text = element_text(size = 9),
+    legend.title = element_text(size = 9)
+  )
+
+print(SD_APAplot)
+```
+
+# SD SHORT FORM
+
+## Import Data
+
+This section imports the Qualtrics data file.
+```{r SDS import-data}
+data_wide_short <- read.delim(
+  file = paste0(path, "/", sd_short),
+  sep = ",",
+  quote = "\"",
+  header = TRUE
+)
+```
+
+
+- 1_SDshort_decision = N1
+- 2_SDshort_decision = N2
+- 3_SDshort_decision = N5
+- 4_SDshort_decision = N10
+- 5_SDshort_decision = N20
+- 6_SDshort_decision = N50
+- 7_SDshort_decision = N100
+
+## Data Cleaning
+The following steps convert the raw Qualtrics export into participant-level indifference points that can be used for modeling.
+
+### Reshape Data 
+This removes rows that do not contain a participant ID.
+The Social Discounting task contains multiple trials per distance level.  
+This step converts the dataset from **wide format to long format**, which allows trial-level processing. After this step:
+
+- `trial` contains the trial name (e.g., sd1_1, sd10_5)
+- `max_rating` contains the participant’s response.
+```{r SDS reshape_short}
+data_wide_short2 <- data_wide_short[!is.na(data_wide_short$subnum), ]
+data_wide_short3 <- data_wide_short2[,c("X1_SDshort_decision","X2_SDshort_decision","X3_SDshort_decision","X4_SDshort_decision","X5_SDshort_decision","X6_SDshort_decision","X7_SDshort_decision", "subnum")]
+
+longer_numeric_short <- pivot_longer(
+  data_wide_short3,
+  cols = c(
+    "X1_SDshort_decision","X2_SDshort_decision","X3_SDshort_decision","X4_SDshort_decision","X5_SDshort_decision","X6_SDshort_decision","X7_SDshort_decision"
+ ),
+  names_to = "trial",
+  values_to = "max_rating"
+)
+
+```
+
+```{r SDS split-trial-info}
+longer_numeric_short$distance <- sub("_SDshort_decision", "", longer_numeric_short$trial)
+```
+
+### Remove Invalid/Missing Responses
+This step:
+
+- removes missing responses
+- ensures `max_rating` values are numeric
+Then we select rows where max_rating is above or equal to 0 (why we changed -5 to 5) to highlight valid responses
+```{r SDS filter-valid-trials}
+filtered_data_short <- longer_numeric_short[!is.na(as.numeric(longer_numeric_short$max_rating)), ]
+filtered_data_short <- subset(filtered_data_short, max_rating == 0 | max_rating > 0)
+
+```
+
+```{r SDS recode-distance}
+trial_filtered_data_s <- filtered_data_short %>%
+  dplyr::select(-any_of("X")) %>% 
+  mutate(
+    Distance = case_when(
+      distance == "X1" ~ 1,
+      distance == "X2" ~ 2,
+      distance == "X3" ~ 5,
+      distance == "X4" ~ 10,
+      distance == "X5" ~ 20,
+      distance == "X6" ~ 50,
+      distance == "X7" ~ 100,
+      TRUE ~ 0
+    )
+  )
+
+table(trial_filtered_data_s$max_rating)
+```
+
+## Analysis
+This code uses the cleaned data to run the hyperbolic model, extract individual logk values and calculate individual AUC values
+
+### Hyperbolic Model
+The Social Discounting Task is typically analyzed using a hyperbolic discounting model, which estimates how generosity decreases as social distance increases.
+The model estimates two parameters:
+
+- v0: baseline generosity (at social distance = 0)
+- logk: social discounting rate
+
+More negative logk values indicate steeper discounting across social distance.
+
+#### Model 1: Base model (no predictors)
+This model estimates the hyperbolic social discounting function without including any predictors. It is used to obtain **participant-level discounting parameters**, including logk, which reflects the rate of social discounting.
+
+In most cases, researchers should run this model first and extract the **individual logk estimates** from it. These logk values can then be used in subsequent analyses (e.g., regression models) that include covariates or group variables.
+Most users should run this model.
+
+```{r SDS base-model}
+set.seed(1234)
+base_model<-nlme((as.numeric(max_rating))~v0/(1+exp(logk)*Distance), 
+                      fixed=list(v0~1,logk~1),
+                      random=v0+logk~1|subnum,
+                      data=trial_filtered_data_s, 
+                      start=c(v0=60
+                              , logk=-1), 
+                      control=c(nlmeControl(tol=.1, msMaxIter=5000)),
+                      na.action = na.omit)
+summary(base_model)
+
+```
+
+##### Comparison Models
+We should compare the AIC from a hyperbolic model to that of an exponential and linear model to make sure it is the best fit. Below is the code for an exponential model and for a linear model.
+```{r SDS alt models base}
+set.seed(1234)
+exponential_model_base<-nlme((as.numeric(max_rating))~v0*exp(-k*Distance), 
+                 fixed=list(v0~1,k~1),
+                 random=v0+k~1|subnum,
+                 data=trial_filtered_data, 
+                 start=c(v0=55, logk=1), 
+                 control=c(nlmeControl(tol=.1, msMaxIter=1000)),
+                 na.action = na.omit)
+summary(exponential_model_base)
+
+set.seed(1234)
+linear_model_base<-nlme((as.numeric(max_rating))~v0 +k*Distance,
+                fixed=list(v0~1, k~1),
+                random=v0+k~1|subnum,
+                data=trial_filtered_data,
+                start=c(v0=55,k=-4), 
+                control=c(nlmeControl(tol=.1)))
+
+summary(linear_model_base)
+```
+
+##### AIC Weights
+After fitting the hyperbolic, exponential, and linear models to the Social Discounting Task data, we compare their relative fit using Akaike’s Information Criterion (AIC). AIC balances model fit and complexity, with lower values indicating better-fitting models while penalizing unnecessary parameters.
+
+Two complementary approaches are shown here:
+
+Using aictab() (AICcmodavg package):
+
+- Automatically computes AIC, delta AIC (difference from the best model), and AIC weights (relative likelihood that each model is the best).
+- Produces a table ranking models by support from the data.
+
+Manual extraction:
+
+- Extracts AIC for each model using AIC().
+- Computes delta AIC as the difference from the lowest AIC.
+- Calculates AIC weights using 
+- weight
+⁡
+Interpretation:
+Delta AIC (ΔAIC): ΔAIC represents how much worse a model fits relative to the best-fitting model (i.e., the model with the lowest AIC). It is calculated by subtracting the lowest AIC value across all candidate models from the AIC of each model. In most cases, the hyperbolic model will have the lowest AIC, meaning that the exponential and linear models will have positive ΔAIC values relative to the hyperbolic model. In this case, subtract AIC from hyperbolic model from that of exponential or linear model. \ 
+ΔAIC < 2 → substantial support (models are essentially equivalent)\ 
+ΔAIC 4–7 → considerably less support \ 
+ΔAIC > 10 → essentially no support (lower AIC is a better fit model) \ 
+
+AIC weights: AIC weights represent the relative likelihood that each model is the best among the candidate models
+
+- An AIC weight of 1 for the hyperbolic model means it is overwhelmingly the best-fitting model compared to the exponential and linear alternatives.
+```{r SDS AIC_base}
+models_base <- list(base_model, exponential_model_base, linear_model_base)
+model.names_base <- c('hyperbolic', 'exponential', 'linear')
+aictab(cand.set = models_base, modnames = model.names_base)
+
+models_base <- list(hyperbolic = base_model,
+               exponential = exponential_model_base,
+               linear = linear_model_base)
+AICs_base <- sapply(models_base, AIC)
+delta_base <- AICs_base - min(AICs_base)
+weights_base <- exp(-0.5 * delta_base) / sum(exp(-0.5 * delta_base))
+weights_base
+
+AIC_table_base <- data.frame(
+  Model = names(AICs_base),
+  AIC = as.numeric(AICs_base),
+  Delta = delta_base,
+  Weight = weights_base
+)
+
+```
+##### Extract logk
+Below we extract individual logk values for each participant. 
+In most cases, logk values should be extracted from the base model (Model 1). This ensures that individual discounting estimates are derived directly from task behavior and are not influenced by predictors included in the hyperbolic model. These participant-level logk values can then be used in subsequent analyses (e.g., regression models with covariates).
+
+The code below combines the fixed effects and random effects to calculate participant-level logk estimates.
+
+**1. Extract Random Effects** 
+
+This extracts the random effects from the model. These represent how much each participant’s parameters (v0 and logk) differ from the population average estimated by the model. Specifically, we extract the participant-level deviations specifically for the logk parameter and convert it to a vector.
+
+Because the dataset contains multiple rows per participant (one for each social distance), the participant-level random effect is repeated so that it matches the number of rows in the dataset.
+
+Then extract the fixed effect coefficient for logk estimated by the model and converts it to numeric. 
+
+Lastly, we combined the fixed logk with the participant's random deviation to produce the final participant-level logk values and attach their participant IDs
+
+```{r SDS base logk values1}
+logk_random_effects_base <- as.vector(ranef(base_model)[["logk"]])
+logk_random_effects_repeated_base <- rep(logk_random_effects_base, each = 7)  # match number of rows per participant
+
+logk_fixed_effects_base <- as.numeric(fixef(base_model)[grepl("logk", names(fixef(base_model)))])
+
+individual_logk_base <- logk_fixed_effects_base + logk_random_effects_repeated_base
+subnum_column <- trial_filtered_data_s$subnum
+```
+
+**2. Check length**
+
+This checks that the number of logk values matches the number of rows in the dataset before creating the final data frame.
+```{r SDS base logk values2}
+length(subnum_column)
+length(individual_logk_base)
+```
+**3. Final Data Set**
+
+This creates a dataset (individual_logk_df_base) containing:
+
+- participant ID
+- estimated logk value
+```{r SDS base logk values3}
+if (length(subnum_column) == length(individual_logk_base)) {
+  individual_logk_df_base <- data.frame(subnum = subnum_column, logk_base = individual_logk_base)
+  
+  # Sort the data frame by subnum
+  individual_logk_df_base <- individual_logk_df_base[order(individual_logk_df_base$subnum), ]
+  
+  # Display the first few rows of the result
+  head(individual_logk_df_base)
+} else {
+  stop("The lengths of subnum_column and individual_logk do not match.")
+}
+```
+
+##### Extracting AUC \ 
+Area under the curve (AUC) was computed using the trapezoidal method (trapz) across the observed social distance values (1, 2, 5, 10, 20, 50, 100). Because AUC is calculated over the actual range of x-values included in the task, the total span of the social distance axis is 100 − 1 = 99 units. The maximum possible AUC therefore corresponds to a participant consistently selecting the maximum forgone amount (80) across this range, yielding a value of 99 × 10 = 7,920. Observed AUC values were divided by 990 to yield a normalized index bounded between 0 and 1.
+```{r SDS AUC_base}
+# Keep only one row per participant
+individual_logk_df_base_unique <- individual_logk_df_base %>%
+  dplyr::distinct(subnum, .keep_all = TRUE)
+
+trial_filtered_data2 <- dplyr::left_join(
+  trial_filtered_data_s,
+  individual_logk_df_base_unique,
+  by = "subnum"
+)
+
+
+AUC_long <- trial_filtered_data2 %>%
+  group_by(subnum) %>%
+  summarise(AUC = trapz(as.numeric(Distance), as.numeric(max_rating))/990, .groups = "drop") %>%
+  left_join(
+    trial_filtered_data2 %>%
+      dplyr::distinct(subnum, .keep_all = TRUE) %>%
+      dplyr::select(-max_rating, -Distance),  
+    by = "subnum"
+  )
+```
+
+#### Model 2: Model With Predictors (Optional)
+You may want to examine how participant characteristics predict differences in the hyperbolic discounting function itself.
+This model allows predictors (e.g., demographic variables, personality traits, or group membership) to explain variability in the discounting rate (logk).
+
+This step is **optional** and is typically used only if the goal is to test predictors **directly within the hyperbolic model**, rather than analyzing extracted logk values in a separate model.
+
+**Tips for using this model:**
+
+Modify the predictors in the example to match the variables available in your dataset.
+
+Ensure that the number of logk start values matches the number of covariates specified in fixed = list(...).
+```{r SDS hyperbolic-predictor-example, eval = FALSE}
+set.seed(1234)
+predictor_model<-nlme((as.numeric(max_rating))~v0/(1+exp(logk)*Distance), 
+                      fixed=list(v0~1,logk~as.numeric(Age)+as.numeric(Gender)),
+                      random=v0+logk~1|subnum,
+                      data=trial_filtered_data_s, 
+                      start=c(v0=10
+                              , logk=-.1, -.01, -.01), 
+                      control=c(nlmeControl(tol=.1, msMaxIter=5000)),
+                      na.action = na.omit)
+
+summary(predictor_model)
+```
+
+
+##### Comparison Models
+We should compare the AIC from a hyperbolic model to that of an exponential and linear model to make sure it is the best fit. Below is the code for an exponential model and for a linear model.
+```{r SDS alt models pred, eval = FALSE}
+set.seed(1234)
+exponential_model_pred<-nlme((as.numeric(max_rating))~v0*exp(-k*Distance), 
+                 fixed=list(v0~1,k~as.numeric(Age)+as.numeric(Gender)),
+                 random=v0+k~1|subnum,
+                 data=trial_filtered_data_s, 
+                 start=c(v0=10, logk=.1,.01,-.1), 
+                 control=c(nlmeControl(tol=.1, msMaxIter=1000)),
+                 na.action = na.omit)
+summary(exponential_model_pred)
+
+set.seed(1234)
+linear_model_pred<-nlme((as.numeric(max_rating))~v0 +k*Distance,
+                fixed=list(v0~1, k~as.numeric(Age)+as.numeric(Gender)),
+                random=v0+k~1|subnum,
+                data=trial_filtered_data_s,
+                start=c(v0=5,k=-1, .1, .1), 
+                control=c(nlmeControl(tol=.1)))
+summary(linear_model_pred)
+```
+
+##### AIC Weights
+After fitting the hyperbolic, exponential, and linear models to the Social Discounting Task data, we compare their relative fit using Akaike’s Information Criterion (AIC). AIC balances model fit and complexity, with lower values indicating better-fitting models while penalizing unnecessary parameters.
+
+Two complementary approaches are shown here:
+
+Using aictab() (AICcmodavg package):
+
+- Automatically computes AIC, delta AIC (difference from the best model), and AIC weights (relative likelihood that each model is the best).
+- Produces a table ranking models by support from the data.
+
+Manual extraction:
+
+- Extracts AIC for each model using AIC().
+- Computes delta AIC as the difference from the lowest AIC.
+- Calculates AIC weights using 
+- weight
+⁡
+Interpretation:
+
+Delta AIC (ΔAIC): How much worse a model is compared to the best-fitting model.
+
+- ΔAIC < 2 → substantial support
+- ΔAIC 4–7 → considerably less support
+- ΔAIC > 10 → essentially no support
+
+AIC weights: The probability that a given model is the best among the candidates.
+
+- An AIC weight of 1 for the hyperbolic model means it is overwhelmingly the best-fitting model compared to the exponential and linear alternatives.
+```{r SDS AIC_pred, eval = FALSE}
+#aictab()
+models_pred <- list(predictor_model, exponential_model_pred, linear_model_pred)
+model.names_pred <- c('hyperbolic', 'exponential', 'linear')
+aictab(cand.set = models_pred, modnames = model.names_pred)
+
+
+
+#manual
+models_pred <- list(hyperbolic = predictor_model,
+               exponential = exponential_model_pred,
+               linear = linear_model_pred)
+
+AICs_pred <- sapply(models_pred, AIC)
+delta_pred <- AICs_pred - min(AICs_pred)
+weights_pred <- exp(-0.5 * delta_pred) / sum(exp(-0.5 * delta_pred))
+weights_pred
+AIC_table_pred <- data.frame(
+  Model = names(AICs_pred),
+  AIC = as.numeric(AICs_pred),
+  Delta = delta_pred,
+  Weight = weights_pred
+)
+
+```
+
+##### Extracting logk values
+Below we extract individual logk values for each participant. 
+In most cases, logk values should be extracted from the base model (Model 1). This ensures that individual discounting estimates are derived directly from task behavior and are not influenced by predictors included in the hyperbolic model. These participant-level logk values can then be used in subsequent analyses (e.g., regression models with covariates).
+
+The code below combines the fixed effects and random effects to calculate participant-level logk estimates.
+
+**1. Extract Random Effects** 
+
+This extracts the random effects from the model. These represent how much each participant’s parameters (v0 and logk) differ from the population average estimated by the model. Specifically, we extract the participant-level deviations specifically for the logk parameter and convert it to a vector.
+
+Because the dataset contains multiple rows per participant (one for each social distance), the participant-level random effect is repeated so that it matches the number of rows in the dataset.
+
+Then extract the fixed effect coefficient for logk estimated by the model and converts it to numeric. 
+
+```{r SDS pred logk values1, eval = FALSE}
+logk_random_effects_pred <- as.vector(ranef(predictor_model)[["logk.(Intercept)"]])
+logk_random_effects_repeated_pred <- rep(logk_random_effects_pred, each = 7)  
+
+logk_fixed_effects_pred <- as.numeric(fixef(predictor_model)[grepl("logk", names(fixef(predictor_model)))])
+```
+
+**2. Create Predictor Matrix from the Data**
+
+This creates a matrix containing the predictor variables (covariates) used in the model.
+
+This step is necessary because the model estimates how these predictors influence logk. The matrix is used to compute the predicted logk values for each observation.
+
+Important:
+
+- The predictors in this step must match those used in the hyperbolic model (in the same order!).
+```{r SDS pred logk values2, eval = FALSE}
+data_predictors <- model.matrix(~ as.numeric(Age) + as.numeric(Gender), 
+                                data = trial_filtered_data_s)
+```
+
+**3. Calculate the Fixed Component of Logk**
+
+This multiplies the predictor matrix by the fixed effect coefficients and converts it to a vector.
+
+This calculates the predicted logk value based on the predictors alone, before adding the participant-level deviation.
+```{r SDS pred logk values3, eval = FALSE}
+logk_fixed_part_pred <- data_predictors %*% logk_fixed_effects_pred
+logk_fixed_part_pred <- as.vector(logk_fixed_part_pred)
+```
+
+**4. Combine fixed and random effects**
+
+This step combines:
+
+- the predicted logk from the predictors
+- the participant’s random deviation
+- This produces the final participant-level logk values.
+
+Then it attaches participant IDs
+```{r SDS pred logk values4, eval = FALSE}
+individual_logk_pred <- logk_fixed_part_pred + logk_random_effects_repeated_pred
+subnum_column <- trial_filtered_data_s$subnum
+```
+
+**5. Check length**
+
+This checks that the number of logk values matches the number of rows in the dataset before creating the final data frame.
+```{r SDS pred logk values5, eval = FALSE}
+length(subnum_column)
+length(individual_logk_pred)
+```
+**6. Final Data Set**
+
+This creates a dataset (individual_logk_df) containing:
+
+- participant ID
+- estimated logk value
+```{r SDS pred logk values6, eval = FALSE}
+if (length(subnum_column) == length(individual_logk_pred)) {
+  individual_logk_df_pred <- data.frame(subnum = subnum_column, logk_pred = individual_logk_pred)
+  
+  # Sort the data frame by subnum
+  individual_logk_df_pred <- individual_logk_df_pred[order(individual_logk_df_pred$subnum), ]
+  
+  # Display the first few rows of the result
+  head(individual_logk_df_pred)
+} else {
+  stop("The lengths of subnum_column and individual_logk do not match.")
+}
+```
+
+##### Extracting AUC
+```{r SDS AUC_pred, eval = FALSE}
+individual_logk_df_pred_unique <- individual_logk_df_pred %>%
+  dplyr::distinct(subnum, .keep_all = TRUE)
+
+if (exists("AUC_long")) {
+  AUC_long <- dplyr::left_join(
+    AUC_long,
+    individual_logk_df_pred_unique,
+    by = "subnum"
+  )
+} else {
+  trial_filtered_data3 <- dplyr::left_join(
+    trial_filtered_data_s,
+    individual_logk_df_pred_unique,
+    by = "subnum"
+  )
+  
+  AUC_long <- trial_filtered_data3 %>%
+    group_by(subnum) %>%
+    summarise(AUC = trapz(as.numeric(Distance), as.numeric(max_rating))/8000, .groups = "drop") %>%
+    left_join(
+      trial_filtered_data3 %>%
+        dplyr::distinct(subnum, .keep_all = TRUE) %>%
+        dplyr::select(-max_rating, -Distance, distance, max_rating),
+      by = "subnum"
+    )
+}
+
+```
+
+
+### Graph of hyperbolic curve 
+
+This code generates a plot of participants’ generosity across social distance, scaled as a proportion of the maximum possible amount (percentage). The workflow automatically adapts based on whether the dataset contains a grouping variable (Group):
+
+- With "Group" present: The data are summarized separately for each group. The plot displays one line per group with shaded ribbons representing ±1 standard error of the mean. Groups are automatically labeled “Group1” and “Group2,” and color-coded for clarity.
+- Without "Group": The data are summarized across all participants, producing a single hyperbolic curve with its standard error ribbon.
+
+This approach ensures the graph works whether or not multiple groups are present, providing a clear visualization of social discounting behavior in your sample.
+
+```{r SDS graph, echo = FALSE}
+trial_filtered_data_s <- trial_filtered_data_s %>% mutate(percentage = as.numeric(max_rating) / 10)
+
+if("group2" %in% colnames(trial_filtered_data_s)) {
+  
+  summary_data <- trial_filtered_data_s %>%
+    group_by(Distance, group2) %>%
+    summarise(payment = mean(percentage, na.rm = TRUE),
+              ste = sd(percentage, na.rm = TRUE)/sqrt(n()),
+              .groups = "drop") %>%
+    mutate(Group = ifelse(group2 == 1, "Group1", "Group2"))
+  
+  colors_mapping <- c("Group2" = "coral", "Group1" = "darkturquoise")
+  
+} else {
+  
+  summary_data <- trial_filtered_data_s %>%
+    group_by(Distance) %>%
+    summarise(payment = mean(percentage, na.rm = TRUE),
+              ste = sd(percentage, na.rm = TRUE)/sqrt(n()),
+              .groups = "drop") %>%
+    mutate(Group = "All Participants")
+  
+  colors_mapping <- c("All Participants" = "darkturquoise")
+}
+
+# Plot curve
+SD_APAplot_s <- ggplot(summary_data, aes(x = Distance, y = payment, color = Group, fill = Group)) +
+  geom_line(linewidth = 1.5) +
+  geom_ribbon(aes(ymin = payment - ste, ymax = payment + ste), alpha = 0.3) +
+  labs(title = "Hyperbolic Social Discounting Curve",
+       x = "Social Distance",
+       y = "Proportion of $ Willing to Forgo") +
+  scale_color_manual(values = colors_mapping) +
+  scale_fill_manual(values = colors_mapping) +
+  scale_y_continuous(limits = c(0, 1)) +
+  theme_apa(base_size = 10, box = FALSE) +
+  theme(
+    text = element_text(family = "HelveticaNeue"),
+    axis.title.x = element_text(size = 10, margin = margin(t = 10)),
+    axis.title.y = element_text(size = 10, margin = margin(r = 10)),
+    axis.text = element_text(size = 10),
+    axis.line = element_line(colour = "black"),
+    panel.grid = element_blank(),
+    legend.text = element_text(size = 9),
+    legend.title = element_text(size = 9)
+  )
+
+print(SD_APAplot_s)
+```
