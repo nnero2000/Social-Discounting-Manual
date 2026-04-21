@@ -502,6 +502,7 @@
             <li><a href="#data-collection">Data Collection</a></li>
             <li><a href="#data-preparation">Data Preparation</a></li>
             <li><a href="#data-cleaning">Cleaning &amp; Max Willing to Forgo</a></li>
+            <li><a href="#alternative-estimation">Alternative Estimation Approach for Missing Data</a></li>
             <li><a href="#hyperbolic-model">Hyperbolic Model</a></li>
             <li><a href="#logk-auc">Extracting logk and AUC</a></li>
             <li><a href="#visualization">Visualization</a></li>
@@ -812,11 +813,15 @@
         <p>Where:</p>
         <ul>
           <li><span class="var">V</span> — amount willing to forgo at a given social distance</li>
-          <li><span class="var">V₀</span> — generosity toward the closest other (intercept; social distance = 0)</li>
+          <li><span class="var">V₀</span> — model-implied intercept representing baseline generosity (i.e., predicted value at N = 0)</li>
           <li><span class="var">k</span> — the social discounting rate</li>
           <li><span class="var">N</span> — social distance</li>
         </ul>
         <p>
+          The parameter <span class="var">V₀</span> represents the intercept, or the amount of 
+          money willing to forgo when N = 0. In this analysis pipeline, social distances begin at N = 1. 
+          As a result, <span class="var">V₀</span> is not directly observed in the data 
+          but is instead estimated as the extrapolated intercept of the fitted hyperbolic function. 
           The parameter <span class="var">k</span> reflects how steeply
           generosity declines as social distance increases. Higher
           <span class="var">k</span> values indicate steeper discounting; lower
@@ -966,9 +971,9 @@
           for themselves, while positive values (10–80) indicate the participant shared the money.
           These positive values are calculated by subtracting 75 from the
           amount offered to keep for themselves, generating the <strong>amount willing to forgo</strong>
-          that trial (e.g., $155 for you, or give $75 and keep $75, is recoded
-          to 80). For Trial 9 (keep $75 for yourself, or give $75 to N and
-          keep $75), <code>-5</code> indicates the participant kept the money
+          that trial (e.g., <span class="money">$155</span> for you, or give <span class="money">$75</span> and keep <span class="money">$75</span>, is recoded
+          to 80). For Trial 9 (keep <span class="money">$75</span> for yourself, or give <span class="money">$75</span> to N and
+          keep <span class="money">$75</span>), <code>-5</code> indicates the participant kept the money
           and <code>0</code> indicates they shared. These recoded values are
           used to calculate the indifference point and the maximum amount
           willing to forgo.
@@ -986,7 +991,7 @@
         <p>
           Responses are recoded in Qualtrics and each social distance has one
           response value. Response options are recoded to reflect the amount
-          given to the N for that choice (e.g., keep $10 and give $0 is
+          given to the N for that choice (e.g., keep <span class="money">$10</span> and give <span class="money">$0</span> is
           recoded to 0).
         </p>
       </section>
@@ -1005,10 +1010,10 @@
           to forgo.
         </p>
         <ol>
-          <li><strong>Reshape data (wide to long).</strong> Raw Qualtrics exports contain each trial as a separate column (e.g., <code>sd1_1</code>, <code>sd10_5</code>). After reshaping, the <code>trial</code> column contains the trial name and the <code>choice</code> column contains the participant's response.</li>
+          <li><strong>Reshape data (wide to long).</strong> Raw Qualtrics exports contain each trial as a separate column (e.g., <code>sd1_1</code>, <code>sd10_5</code>). To facilitate trial-level processing, the data are converted from wide format to long format. In the long format, each row corresponds to a single trial observation, such that the participant identifier (subnum) is repeated for the total number of trials. After reshaping, the <code>trial</code> column contains the item or trial name (e.g., sd1_1) and the <code>choice</code> column contains the participant's response.</li>
           <li><strong>Split trial information.</strong> Each trial name contains two pieces of information: social distance and trial number within the distance block. These are split into separate columns (<code>distance</code> and <code>amount1</code>).</li>
           <li><strong>Recode choice values.</strong> Most trials are coded as 0 = kept and a positive value (10–80) = shared. Trial 9 uses −5 = kept and 0 = shared. To simplify calculation of the crossover point, −5 is temporarily recoded to 5.</li>
-          <li><strong>Remove invalid/missing responses.</strong> Rows with missing responses are removed and all <code>choice</code> values are confirmed to be numeric. Only rows with <code>choice</code> ≥ 0 are retained (after recoding −5 to 5).</li>
+          <li><strong>Remove invalid/missing responses.</strong> Ideally for datasets with minimal missingness, rows with missing responses  are removed and all <code>choice</code> values are confirmed to be numeric. Only rows with <code>choice</code> ≥ 0 are retained (after recoding −5 to 5).</li>
           <li><strong>Convert social distance labels to numeric.</strong> Distance labels (<code>sd1</code>, <code>sd2</code>, …) are converted to numeric values (1, 2, …) in a new column called <code>Distance</code>.</li>
           <li><strong>Compute indifference points and maximum amount willing to forgo.</strong> For each participant and social distance, identify the maximum choice for that distance. This represents the crossover point where the participant switched from keeping money. Either a switch from a positive number (10–80) to 0, or a switch from 0 to 5 (if the participant kept money for all trials). The maximum choice value for that distance is stored in a new column called <code>max_rating</code>. Any temporary 5 values are converted back to −5 to distinguish participants who kept money on all trials as having their maximum willing to forgo at the last trial. The output is a dataframe called <code>trial_filtered_data</code> containing one row per participant per social distance, with the value under <code>max_rating</code> representing the maximum amount willing to forgo.</li>
         </ol>
@@ -1043,9 +1048,9 @@
           eliminating the need to calculate indifference points.
         </p>
         <ol>
-          <li><strong>Reshape data (wide to long).</strong> Raw exports contain one column per social distance decision (e.g., <code>X1_SDshort_decision</code>). After reshaping, <code>trial</code> contains the trial name and <code>max_rating</code> contains the participant's response.</li>
+          <li><strong>Reshape data (wide to long).</strong> Raw exports contain one column per social distance decision (e.g., <code>X1_SDshort_decision</code>). To facilitate trial-level processing, the data are converted from wide format to long format. In the long format, each row corresponds a single decision for a single participant. After reshaping, <code>trial</code> contains the trial name and <code>max_rating</code> contains the participant's response for that social distance.</li>
           <li><strong>Split trial information.</strong> The trial name is split into <code>distance</code> (e.g., <code>X1</code>) and <code>amount1</code> (every row will have <code>SDshort_decision</code>).</li>
-          <li><strong>Remove invalid/missing responses.</strong> Rows with missing responses are removed and <code>max_rating</code> is confirmed numeric. Only rows with <code>max_rating ≥ 0</code> are retained.</li>
+          <li><strong>Remove invalid/missing responses.</strong> Ideally for datasets with minimal missingness, rows with missing responses  are removed and <code>max_rating</code> is confirmed numeric. Only rows with max_rating ≥ 0 are retained.</li>
           <li><strong>Convert social distance labels to numeric.</strong> Using the table below.</li>
         </ol>
         <div class="table-wrap">
@@ -1071,22 +1076,113 @@
         </p>
       </section>
 
-      <section id="hyperbolic-model" class="block">
+      <section id="alternative-estimation" class="block">
         <div class="section-head">
           <span class="section-num">08</span>
+          <h2>Alternative Estimation Approach for Missing Data</h2>
+        </div>
+
+        <p>
+          This is only used in the long-form task, where the indifferent point needs to be estimated 
+          from multiple decisions within each social distance. In contrast, the short-form task 
+          includes only one decision per social distance, meaning the indifferent point is directly observed.
+        </p>
+        
+        <strong>When to use this approach:</strong>
+          <ul>
+            <li>Datasets with missing trial-level responses (e.g., neuroimaging or large-scale online studies)</li>
+            <li>When the crossover-based method is not appropriate due to incomplete choice sequences</li>
+          </ul>
+
+        <p>
+          In these cases, the standard crossover-based method for estimating indifference points may not be
+          appropriate, as it relies on observing a complete sequence of choices within each
+          social distance.
+        </p>
+      
+        <p>
+          To address this, indifference points can alternatively be estimated using a
+          <strong>trial-level logistic regression approach</strong>, which uses all available observed trials
+          without requiring complete data.
+        </p>
+      
+        <p>
+          Specifically, we model the probability of choosing to share (coded as 1; keep = 0)
+          as a function of the amount of money forgone on each trial. The logistic regression
+          model is defined as: <code>logit(P(share)) = β₀ + β₁ × amount_forgone</code> </p>
+      
+        <p>
+          Here, <strong>amount_forgone</strong> represents the monetary cost associated with
+          choosing to share, ranging from <span class="money">$80</span> to <span class="money">$0</span> for the original task.
+          The model estimates how the probability of sharing changes as a function of increasing monetary cost by fitting
+          a continuous logistic choice function across this range of observed values.
+        </p>
+      
+        <p>
+          Rather than identifying a discrete switching point in the observed data, the model
+          describes a smooth decision curve over the range of possible forgone amounts.
+        </p>
+      
+        <p>
+          The indifference point is defined as the value of <strong>amount_forgone</strong> at
+          which the predicted probability of sharing equals 0.5. This represents the point of
+          equal likelihood between keeping and sharing and can be interpreted as the
+          participant’s maximum willingness to forgo monetary reward at a given social
+          distance.
+        </p>
+      
+        <p>
+          At this point, the logit equals zero, and the indifference point can be derived
+          analytically as: <code>Indifference Point = −β₀ / β₁</code> </p>
+      
+        <p>
+
+          <div class="callout">
+            <p><strong>Note.</strong> 
+              <ul>
+                <li>Participants with no variability in responses (i.e., always choosing to keep or
+                  always choosing to share) are assigned boundary values corresponding to the limits
+                  of the task, as logistic regression cannot be reliably estimated in the absence of
+                  response variability</li>
+                <li>
+                  Indifference points are not estimated for participant–distance
+                  combinations with fewer than three valid responses, as such cases do not provide
+                  sufficient information for stable model fitting  
+                </li>
+              </ul>
+            </p>
+          </div>
+      
+        <p>
+          This approach yields participant- and distance-specific estimates that are directly
+          comparable to those obtained from the crossover method and can be used in subsequent
+          analyses, such as estimating hyperbolic discounting parameters (log(k)) or area
+          under the curve (AUC).
+        </p>
+
+      </section>
+
+
+      <section id="hyperbolic-model" class="block">
+        <div class="section-head">
+          <span class="section-num">09</span>
           <h2>Hyperbolic Model</h2>
         </div>
         <p>
-          After computing the maximum amount willing to forgo for each
-          participant and social distance, the next step is to estimate the
-          hyperbolic discounting function using nonlinear mixed-effects
-          modeling. The provided R script uses the <code>nlme</code> package to
-          estimate both:
+          After computing the maximum amount willing to forgo for each participant and social distance, 
+          the next step is to estimate the hyperbolic discounting function using nonlinear mixed-effects 
+          modeling. A nonlinear mixed-effects model (NLME) is a statistical approach used to estimate 
+          nonlinear relationships while accounting for both: 
         </p>
         <ul>
-          <li><strong>Fixed effects</strong> — overall average <span class="var">v0</span> and <span class="var">logk</span></li>
-          <li><strong>Random effects</strong> — participant-specific deviations in <span class="var">v0</span> and <span class="var">logk</span></li>
+          <li><strong>Fixed effects</strong> — overall average <span class="var">V₀</span> and <span class="var">logk</span></li>
+          <li><strong>Random effects</strong> — participant-specific deviations in <span class="var">V₀</span> and <span class="var">logk</span>, corresponding to random intercepts and random effects on the discounting parameter</li>
         </ul>
+        <p>  
+          This allows estimation of individual level discounting parameters while accounting for 
+          repeated observations across social distances. The provided R script uses the <code>nlme</code>
+          package to implement the hyperbolic model.
+        </p>
 
         <h3>1. Base model (no predictors)</h3>
         <p>
@@ -1099,9 +1195,9 @@
         </p>
         <p>Key components:</p>
         <ul>
-          <li><code>v0 / (1 + exp(logk) * Distance)</code> → hyperbolic function</li>
+          <li><code>V₀ / (1 + exp(logk) * Distance)</code> → hyperbolic function</li>
           <li><code>exp(logk)</code> → ensures the discounting parameter <span class="var">k</span> is positive</li>
-          <li><code>random = v0 + logk ~ 1 | subnum</code> → estimates individual-level parameters</li>
+          <li><code>random = V₀ + logk ~ 1 | subnum</code> → estimates individual-level parameters</li>
         </ul>
 
         <h3>2. Alternative models (optional but recommended)</h3>
@@ -1150,7 +1246,7 @@
           shallower discounting (greater generosity).
         </p>
         <div class="callout">
-          <p><strong>Tips.</strong> Modify predictors to match variables in your dataset. Predictors in the fixed-effects list (<code>logk ~ </code>) model individual differences in discounting rate, not baseline generosity (<span class="var">v0</span>). Ensure the number of starting values for <span class="var">logk</span> (<code>start = c(...)</code>) matches the number of predictors — the first value corresponds to the intercept of logk, followed by one value per predictor in the same order.</p>
+          <p><strong>Tips.</strong> Modify predictors to match variables in your dataset. Predictors in the fixed-effects list (<code>logk ~ </code>) model individual differences in discounting rate, not baseline generosity (<span class="var">V₀</span>). Ensure the number of starting values for <span class="var">logk</span> (<code>start = c(...)</code>) matches the number of predictors — the first value corresponds to the intercept of logk, followed by one value per predictor in the same order.</p>
         </div>
 
         <h3>Common issues and troubleshooting</h3>
@@ -1192,7 +1288,7 @@
         <div class="card tint">
           <div class="card-label">Common causes</div>
           <ul style="margin: 0">
-            <li>Poor starting values for model parameters (<span class="var">v0</span>, <span class="var">logk</span>)</li>
+            <li>Poor starting values for model parameters (<span class="var">V₀</span>, <span class="var">logk</span>)</li>
             <li>Overly complex random-effects structure (e.g., random slopes for logk)</li>
             <li>Limited variability in participant responses (e.g., always choosing 0 or the maximum)</li>
             <li>Too few observations per participant (especially in the Short Form)</li>
@@ -1202,16 +1298,16 @@
         <div class="card tint">
           <div class="card-label">Recommended solutions</div>
           <ul style="margin: 0">
-            <li><strong>Adjust starting values:</strong> choose initial estimates close to plausible values (<span class="var">v0</span> near mean <code>max_rating</code>, <span class="var">logk</span> near −1). Iteratively adjusting starting values is standard practice.</li>
+            <li><strong>Adjust starting values:</strong> choose initial estimates close to plausible values (<span class="var">V₀</span> near mean <code>max_rating</code>, <span class="var">logk</span> near −1). Iteratively adjusting starting values is standard practice.</li>
             <li><strong>Iteration limits:</strong> increase <code>msMaxIter</code> or adjust <code>tol</code> if convergence is not achieved.</li>
-            <li><strong>Simplify random effects:</strong> consider removing non-essential random slopes if convergence fails.</li>
+            <li><strong>Simplify random effects:</strong> consider removing reducing model complexity by removing random effects (e.g., only allowing random intercepts), rather than estimating both participant-specific v) and logk simultaneously.</li>
           </ul>
         </div>
       </section>
 
       <section id="logk-auc" class="block">
         <div class="section-head">
-          <span class="section-num">09</span>
+          <span class="section-num">10</span>
           <h2>Extraction of logk and AUC</h2>
         </div>
         <p>
@@ -1228,7 +1324,7 @@
         <h3>Extracting individual logk values</h3>
         <p>The hyperbolic model estimates two types of parameters:</p>
         <ul>
-          <li><strong>Fixed effects</strong> — population-average estimates of <span class="var">v0</span> (baseline generosity) and <span class="var">logk</span> (discounting rate)</li>
+          <li><strong>Fixed effects</strong> — population-average estimates of <span class="var">V₀</span> (baseline generosity) and <span class="var">logk</span> (discounting rate)</li>
           <li><strong>Random effects</strong> — participant-level deviations from these averages</li>
         </ul>
         <p>To obtain participant-specific logk values:</p>
@@ -1242,13 +1338,18 @@
         <h3>Extracting Area Under the Curve (AUC)</h3>
         <p>AUC provides a model-free measure of overall generosity:</p>
         <ol>
-          <li>For each participant, the amount willing to forgo is plotted across all social distances.</li>
-          <li>The area under this curve is calculated using numerical integration (trapezoidal method).</li>
-          <li>AUC is normalized by the maximum possible area to yield a value between 0 and 1. Higher AUC values indicate greater generosity and shallower social discounting; lower AUC values indicate steeper discounting.</li>
+          <li>For each participant, the amount willing to forgo is plotted across all social distances (1, 2, 5, 10, 20, 50, 100).</li>
+          <li> The area under this curve is calculated using numerical integration (trapezoidal method), which treats each pair of adjacent points (willingness to forgo at two successive social distances) as a trapezoid. For each interval, the area is computed as: <code>Difference in N * Average of adjacent willingness-to-forgo values</code> The difference in social distance (ΔN) represents the spacing between adjacent distance values (e.g., 2 − 1, 5 − 2, 10 − 5), which is not constant across the task. The segment-wise areas are then summed to produce a single raw AUC value per participant. </li>          
+          <li>The resulting raw AUC value is then normalized by the maximum possible area to yield a standardized AUC value bounded between 0 and 1. The normalization is defined as: <code>Maximum N - Minimum N * Maximum Amount Able to Forgo</code> This reflects the total span of the observed social distance axis (i.e., 100 − 1 = 99), over which the trapezoidal integration is performed. </li>
+          <ul>
+            <li>For the Original Social Discounting Task this is 99 * 80</li>
+            <li>For the Social Discounting Short Form this is 99 * 10</li>
+          </ul>
+          <li>Higher AUC values indicate greater generosity and shallower social discounting; lower AUC values indicate steeper discounting.</li>
         </ol>
         <p>
           Unlike logk, AUC does not rely on fitting a specific model and
-          provides a complementary perspective on social valuation across
+          provides a complementary perspective on overall social valuation across
           distances.
         </p>
         <div class="callout">
@@ -1258,7 +1359,7 @@
 
       <section id="visualization" class="block">
         <div class="section-head">
-          <span class="section-num">10</span>
+          <span class="section-num">11</span>
           <h2>Visualization</h2>
         </div>
         <p>
@@ -1291,7 +1392,7 @@
 
       <section id="references" class="block">
         <div class="section-head">
-          <span class="section-num">11</span>
+          <span class="section-num">12</span>
           <h2>References</h2>
         </div>
       
