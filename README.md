@@ -1,10 +1,6 @@
 # Social Discounting Task: Data Collection & Analysis Toolkit
 
-This repository provides resources for administering, processing, and analyzing data from the **Social Discounting Task** and the **Social Discounting Task Short Form** by including:
-- Social Discounting Manual (conceptual and methodological guidance)
-- Qualtrics survey templates
-- Shiny applications for data collection
-- R Markdown analysis pipeline
+This repository provides resources for administering, processing, and analyzing data from the **Social Discounting Task** and the **Social Discounting Task Short Form**.
  
 It is designed to support **transparent, reproducible behavioral research** by providing task materials, data cleaning and analysis pipelines, and detailed documentation in one place.
 
@@ -13,16 +9,13 @@ It is designed to support **transparent, reproducible behavioral research** by p
 ## Overview
 
 This repository accompanies a comprehensive manual that includes:
+- Social Discounting Manual (with conceptual background and step-by-step methodological guidance)
+- Qualtrics survey templates
+- Shiny applications for data collection
+- R Markdown analysis pipeline for data cleaning, indifference point estimation, analaysis, and visualization
 
-- Conceptual background on the Social Discounting Task  
-  *(Jones & Rachlin, 2006, 2009)*  
-- Description of task structure and administration  
-- Step-by-step guidance for:
-  - Data cleaning  
-  - Indifference point estimation (long form)  
-  - Analysis and visualization  
 
-In addition to the original task, this repository includes materials for the **Social Discounting Task Short Form** *(Amormino et al., 2025, 2026)*, including task implementation and analytic procedures.
+In addition to the original **Social Discounting Task** *(Jones & Rachlin, 2006, 2009)* , this repository includes materials for the **Social Discounting Task Short Form** *(Amormino et al., 2025, 2026)*, including task implementation and analytic procedures.
 
 The manual is intended to be used alongside the provided **R Markdown script**, which walks users through the full data processing pipeline for both task versions.
 
