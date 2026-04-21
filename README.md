@@ -92,10 +92,13 @@ If you use these materials, please use the following citations:
 **Manual, R Markdown Script, Data collection templates**
 
 **The Social Discounting Task**
+
 Jones, B., & Rachlin, H. (2006). Social Discounting. Psychological Science, 17(4), 283–286.
+
 Jones, B., & Rachlin, H. (2009). Delay, Probability, and Social Discounting in A Public Goods Game. Journal of the Experimental Analysis of Behavior, 91(1), 61–73. https://doi.org/10.1901/jeab.2009.91-61
 
 **The Social Discounting Short-Form**
+
 Amormino, P., Gao, J., Li, P., Induni, S., Amar, S., Balabanis, K., Burt, A., Dockray, K., Doherty, H., Dube, N., Janney, L., Kales, E., King, I., Kronthal, E., Lee, B., Regan, E., Romero, I., Jones, B. A., Seaman, K. L., & Marsh, A. A. (2025). Social discounting and anti-/pro-sociality: A meta-analysis and (short-form) replication. Personality and Individual Differences, 247, 113447. https://doi.org/10.1016/j.paid.2025.113447
 
 
