@@ -23,30 +23,37 @@ In addition to the original task, this repository includes materials for the **S
 The manual is intended to be used alongside the provided **R Markdown script**, which walks users through the full data processing pipeline for both task versions.
 
 ---
-## Repository Structure
+## Repository Folder Structure
 
-### 📁 Data Collection
+### Social Discounting Manual
 
-Tools for administering the tasks and collecting data.
+- PDF manual containing:
+  - Conceptual overview  
+  - Task design and structure  
+  - Data cleaning procedures  
+  - Analysis workflows  
+  - Visualization guidelines  
+
+- Designed to be used alongside the R Markdown script  
+
+- 🌐 HTML version available via GitHub Pages:  
+  [View Social Discounting Manual](https://nnero2000.github.io/Social-Discounting-Manual/Manual/Social%20Discounting%20Manual.html)
+
+### Data Collection
+
+Tools for administering the tasks and collecting data that are pre-configured with correct item and question names, generating a csv file for compatibility with the R Markdown Analysis Script.
 
 **Qualtrics Templates**
 - `Qualtrics_SD_Long.qsf` – Original Social Discounting Task  
-- `Qualtrics_SD_Short.qsf` – Social Discounting Task Short Form  
-- Pre-configured with correct item and question names  
-- Compatible with the analysis pipeline  
+- `Qualtrics_SD_Short.qsf` – Social Discounting Task Short Form   
 
 **Shiny Apps (R-based data collection)**
 - `Long_SD_ShinyApp` – Long-form task  
-- `Short_SD_ShinyApp` – Short-form task  
-- Allow direct data collection within R  
-
-**Output Format**
-- All tools generate `.csv` files  
-- Outputs are already formatted for compatibility with the analysis script  
+- `Short_SD_ShinyApp` – Short-form task   
 
 ---
 
-### 📁 R Scripts
+### R Scripts
 
 - R Markdown script for:
   - Data cleaning  
@@ -61,19 +68,46 @@ Tools for administering the tasks and collecting data.
 
 ---
 
-### 📁 Social Discounting Manual
+## Getting Started
 
-- PDF manual containing:
-  - Conceptual overview  
-  - Task design and structure  
-  - Data cleaning procedures  
-  - Analysis workflows  
-  - Visualization guidelines  
+1. **Choose a data collection method**
+   - Upload a Qualtrics `.qsf` file, **or**
+   - Run a Shiny app in R  
 
-- Designed to be used alongside the R Markdown script  
+2. **Collect data**
+   - Export or save data as `.csv`  
 
-- 🌐 HTML version available via GitHub Pages:  
-  *(Insert your GitHub Pages link here)*  
+3. **Run the analysis pipeline**
+   - Open the R Markdown script in the `R Scripts` folder  
+   - Follow step-by-step instructions  
+
+4. **Consult the manual**
+   - Use the PDF or HTML version for detailed explanations and methodology  
 
 ---
-[View Social Discounting Manual](https://nnero2000.github.io/Social-Discounting-Manual/Manual/Social%20Discounting%20Manual.html)
+## Citation
+
+If you use these materials, please use the following citations:
+
+**Manual, R Markdown Script, Data collection templates**
+
+**The Social Discounting Task**
+Jones, B., & Rachlin, H. (2006). Social Discounting. Psychological Science, 17(4), 283–286.
+Jones, B., & Rachlin, H. (2009). Delay, Probability, and Social Discounting in A Public Goods Game. Journal of the Experimental Analysis of Behavior, 91(1), 61–73. https://doi.org/10.1901/jeab.2009.91-61
+
+**The Social Discounting Short-Form**
+Amormino, P., Gao, J., Li, P., Induni, S., Amar, S., Balabanis, K., Burt, A., Dockray, K., Doherty, H., Dube, N., Janney, L., Kales, E., King, I., Kronthal, E., Lee, B., Regan, E., Romero, I., Jones, B. A., Seaman, K. L., & Marsh, A. A. (2025). Social discounting and anti-/pro-sociality: A meta-analysis and (short-form) replication. Personality and Individual Differences, 247, 113447. https://doi.org/10.1016/j.paid.2025.113447
+
+
+---
+
+## License
+
+*(Add your license here, e.g., MIT, CC-BY, etc.)*  
+
+---
+
+## Contact
+
+For questions, issues, or contributions, please open an issue on this repository.
+Correspondence concerning this manual should be addressed to Naomi Nero, Department of Psychology, Georgetown University, White Gravenor Hall, Washington, DC 20057, United States. Email: nn444@georgetown.edu 
