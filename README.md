@@ -85,6 +85,12 @@ Tools for administering the tasks and collecting data that are pre-configured wi
 
 If you use this repository, please cite both the relevant methodological papers and this software toolkit.
 
+### Software and Analysis Toolkit
+
+If you use the R Markdown scripts, Shiny applications, Qualtrics templates, or Social Discounting Manual provided in this repository, please cite the software as:
+
+Nero, N. (2026). *Social Discounting Task: Manual and Analysis Toolkit* (Version 1.0.0) [Computer software]. https://doi.org/10.17605/OSF.IO/4UDWX  GitHub repository. https://github.com/nnero2000/Social-Discounting-Manual
+
 ### Social Discounting Task (Original)
 
 Jones, B., & Rachlin, H. (2006). Social discounting. *Psychological Science, 17*(4), 283–286.
@@ -94,12 +100,6 @@ Jones, B., & Rachlin, H. (2009). Delay, probability, and social discounting in a
 ### Social Discounting Task Short Form
 
 Amormino, P., Gao, J., Li, P., Induni, S., Amar, S., Balabanis, K., Burt, A., Dockray, K., Doherty, H., Dube, N., Janney, L., Kales, E., King, I., Kronthal, E., Lee, B., Regan, E., Romero, I., Jones, B. A., Seaman, K. L., & Marsh, A. A. (2025). Social discounting and anti-/pro-sociality: A meta-analysis and (short-form) replication. *Personality and Individual Differences, 247*, 113447. https://doi.org/10.1016/j.paid.2025.113447
-
-### Software and Analysis Toolkit
-
-If you use the R Markdown scripts, Shiny applications, Qualtrics templates, or Social Discounting Manual provided in this repository, please cite the software as:
-
-Nero, N. (2026). *Social Discounting Task: Data Collection & Analysis Toolkit* (Version 1.0) [Computer software]. GitHub repository. https://github.com/nnero2000/Social-Discounting-Manual
 
 ---
 
