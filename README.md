@@ -1,7 +1,7 @@
 ## Social Discounting Task: Manual and Analysis Toolkit
 #### Repository: Social-Discounting-Manual
 
-This repository provides an online [manual](https://nnero2000.github.io/Social-Discounting-Manual/) and resources for administering, processing, and analyzing data from the **Social Discounting Task** and the **Social Discounting Task Short Form**.
+This repository provides an [online manual](https://nnero2000.github.io/Social-Discounting-Manual/) and resources for administering, processing, and analyzing data from the **Social Discounting Task** and the **Social Discounting Task Short Form**.
  
 It is designed to support **transparent, reproducible behavioral research** by providing task materials, data cleaning and analysis pipelines, and detailed documentation in one place.
 
