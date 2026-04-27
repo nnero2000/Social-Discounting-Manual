@@ -1,0 +1,30 @@
+cff-version: 1.2.0
+title: "Social Discounting Task: Manual and Analysis Toolkit"
+message: "If you use these materials, please cite this repository using the DOI below."
+type: software
+
+authors:
+  - family-names: Nero
+    given-names: Naomi
+
+version: 1.0.0
+date-released: 2026-04-27
+
+repository-code: https://github.com/nnero2000/Social-Discounting-Manual
+
+identifiers:
+  - type: doi
+    value: 10.17605/OSF.IO/4UDWX
+
+abstract: >
+  This repository contains materials for administering a social discounting task,
+  including a detailed manual (available in PDF and HTML formats), Qualtrics
+  survey templates, Shiny Applications, and R data cleaning and analysis scripts. 
+
+keywords:
+  - social discounting
+  - decision making
+  - behavioral economics
+  - Qualtrics
+
+license: MIT
