@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 title: "Social Discounting Task: Manual and Analysis Toolkit"
-message: "If you use these materials, please cite this repository using the DOI below."
+message: "If you use these materials, please cite this resource using the DOI."
 type: software
 
 authors:
@@ -15,6 +15,17 @@ repository-code: https://github.com/nnero2000/Social-Discounting-Manual
 identifiers:
   - type: doi
     value: 10.17605/OSF.IO/4UDWX
+
+preferred-citation:
+  type: software
+  authors:
+    - family-names: Nero
+      given-names: Naomi
+  title: "Social Discounting Task: Manual and Analysis Toolkit"
+  version: 1.0.0
+  year: 2026
+  doi: 10.17605/OSF.IO/4UDWX
+  url: https://doi.org/10.17605/OSF.IO/4UDWX
 
 abstract: >
   This repository contains materials for administering a social discounting task,
