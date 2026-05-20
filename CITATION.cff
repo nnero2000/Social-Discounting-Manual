@@ -6,6 +6,8 @@ type: software
 authors:
   - family-names: Nero
     given-names: Naomi
+  - family-names: Marsh
+    given-names: Abigail A.
 
 version: 1.0.0
 date-released: 2026-04-27
@@ -21,6 +23,9 @@ preferred-citation:
   authors:
     - family-names: Nero
       given-names: Naomi
+    - family-names: Marsh
+      given-names: Abigail A.
+
   title: "Social Discounting Task: Manual and Analysis Toolkit"
   version: 1.0.0
   year: 2026
