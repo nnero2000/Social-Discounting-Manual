@@ -1,6 +1,6 @@
 ---
 title: "Social Discounting Package"
-author: "Naomi Nero"
+author: "Naomi Nero & Abigail Marsh"
 date: "2026-04-21"
 output: html_document
 ---
@@ -237,7 +237,7 @@ max_ratings1 <- filtered_data %>%
 ### Compute Indifference Points
 We calculate the **maximum amount participants were willing to forgo** for each social distance by identifying the crossover point where participants switch from keeping money to sharing (indifference point). 
 
-First, we group decisions by Distance and select the **maximum choice value** at each social distance (the most positive number). This selects the **first** time the participant crosses over from keep to share. This maximum rating/willing to forgo is put in a new column called max_rating. Then we left_join all of the other predictor variables (if you have any other covaraites)
+First, we group decisions by Distance and select the **maximum choice value** at each social distance (the most positive number). This selects the **first** time the participant crosses over from keep to share. This maximum rating/willing to forgo is put in a new column called max_rating. Then we left_join all of the other predictor variables (if you have any other covariates)
 
 Then, in the max_rating column, we convert 5 (kept at the last trial) back to -5
 ```{r SDL compute-indifference}
@@ -269,7 +269,7 @@ table(trial_filtered_data$max_rating)
 ```
 
 
-## Missing Data - Data Cleaning Alternative
+## OPTIONAL: Missing Data - Data Cleaning Alternative
 The standard social discounting pipeline identifies indifference points by locating the crossover trial where participants switch from keeping money to sharing. This requires complete data within each social distance. However, in some context (neuroimaging studies, online data collection that doesn't have request response), participants may have a lot of missing data on individual trials and you may not want to pairwise delete.To address this, we use a trial-level logistic regression approach, which uses all available trials to model choices directly and estimate the indifference point.
 
 ### Reshape Data and Split Trial Information
