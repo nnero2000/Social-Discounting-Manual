@@ -1,5 +1,5 @@
 cff-version: 1.2.0
-title: "Social Discounting Task: Manual and Analysis Toolkit"
+title: "An Open-Source Educational Toolkit for Administering and Analyzing Social Discounting Tasks"
 message: "If you use these materials, please cite this resource using the DOI."
 type: software
 
@@ -26,7 +26,7 @@ preferred-citation:
     - family-names: Marsh
       given-names: Abigail A.
 
-  title: "Social Discounting Task: Manual and Analysis Toolkit"
+  title: "An Open-Source Educational Toolkit for Administering and Analyzing Social Discounting Tasks"
   version: 1.0.0
   year: 2026
   doi: 10.17605/OSF.IO/4UDWX
@@ -43,4 +43,4 @@ keywords:
   - behavioral economics
   - Qualtrics
 
-license: MIT
+license: MIT, CC-BY-4.0
