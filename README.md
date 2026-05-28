@@ -1,9 +1,9 @@
-## Social Discounting Task: Manual and Analysis Toolkit
+## An Open-Source Educational Toolkit for Administering and Analyzing Social Discounting Tasks
 #### Repository: Social-Discounting-Manual
 
 This repository provides an [online manual](https://nnero2000.github.io/Social-Discounting-Manual/) and resources for administering, processing, and analyzing data from the **Social Discounting Task** and the **Social Discounting Task Short Form**.
  
-It is designed to support **transparent, reproducible behavioral research** by providing task materials, data cleaning and analysis pipelines, and detailed documentation in one place.
+It is designed to support **transparent, reproducible behavioral research and instruction** by providing task materials, data cleaning and analysis pipelines, and detailed documentation in one place.
 
 ---
 
@@ -89,7 +89,8 @@ If you use this repository, please cite both the relevant methodological papers 
 
 If you use the R Markdown scripts, Shiny applications, Qualtrics templates, or Social Discounting Manual provided in this repository, please cite the software as:
 
-Nero, N., & Marsh, A. A. (2026). *Social Discounting Task: Manual and Analysis Toolkit* (Version 1.0.0) [Computer software]. https://doi.org/10.17605/OSF.IO/4UDWX 
+Nero, N., & Marsh, A. A. (2026). *An Open-Source Educational Toolkit for Administering and Analyzing Social
+  Discounting Tasks* (Version 1.0.0) [Educational Toolkit]. https://doi.org/10.17605/OSF.IO/4UDWX 
 
 ### Social Discounting Task (Original)
 
@@ -104,8 +105,9 @@ Amormino, P., Gao, J., Li, P., Induni, S., Amar, S., Balabanis, K., Burt, A., Do
 ---
 
 ## License
+Code and computational components are licensed under the MIT license. See the [LICENSE](LICENSE-MIT) file for details.
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+The manual, instructural materials, and Qualtrics Templates are licensed under the Creative Commons Attribution 4.0 International License (CC BY 4.0). See the [LICENSE](LICENSE-CCBY) file for details.
 
 ---
 
