@@ -1,9 +1,9 @@
 ## An Open-Source Educational Toolkit for Administering and Analyzing Social Discounting Tasks
 #### Repository: Social-Discounting-Manual
 
-This repository provides an [online manual](https://nnero2000.github.io/Social-Discounting-Manual/) and resources for administering, processing, and analyzing data from the **Social Discounting Task** and the **Social Discounting Task Short Form**.
+This repository provides an educational toolkit containing an [online manual](https://nnero2000.github.io/Social-Discounting-Manual/) and resources for administering, processing, and analyzing data from the **Social Discounting Task** and the **Social Discounting Task Short Form**.
  
-It is designed to support **transparent, reproducible behavioral research and instruction** by providing task materials, data cleaning and analysis pipelines, and detailed documentation in one place.
+It is designed to support **transparent, reproducible behavioral research and the instruction of behavioral decision-making** by providing task materials, instructinal data cleaning and analysis modules, and detailed documentation in one place.
 
 ---
 
@@ -90,7 +90,7 @@ If you use this repository, please cite both the relevant methodological papers 
 If you use the R Markdown scripts, Shiny applications, Qualtrics templates, or Social Discounting Manual provided in this repository, please cite the software as:
 
 Nero, N., & Marsh, A. A. (2026). *An Open-Source Educational Toolkit for Administering and Analyzing Social
-  Discounting Tasks* (Version 1.0.0) [Educational Toolkit]. https://doi.org/10.17605/OSF.IO/4UDWX 
+  Discounting Tasks* (Version 1.0.0). https://doi.org/10.17605/OSF.IO/4UDWX 
 
 ### Social Discounting Task (Original)
 
