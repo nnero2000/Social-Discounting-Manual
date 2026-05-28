@@ -85,7 +85,7 @@ Tools for administering the tasks and collecting data that are pre-configured wi
 
 If you use this repository, please cite both the relevant methodological papers and this software toolkit.
 
-### Software and Analysis Toolkit
+### Educational Toolkit
 
 If you use the R Markdown scripts, Shiny applications, Qualtrics templates, or Social Discounting Manual provided in this repository, please cite the software as:
 
