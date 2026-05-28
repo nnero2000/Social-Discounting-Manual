@@ -19,7 +19,7 @@ identifiers:
     value: 10.17605/OSF.IO/4UDWX
 
 preferred-citation:
-  type: software
+  type: Educational Toolkit
   authors:
     - family-names: Nero
       given-names: Naomi
