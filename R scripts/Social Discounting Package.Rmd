@@ -857,6 +857,8 @@ print(SD_APAplot)
 
 This section imports the Qualtrics data file.
 ```{r SDS import-data}
+
+path <- "~/Library/CloudStorage/Box-Box/LSANdata/NN/Public SD/Github/R Scripts/"
 data_wide_short <- read.delim(
   file = paste0(path, "/", sd_short),
   sep = ",",
@@ -958,7 +960,7 @@ base_model<-nlme((as.numeric(max_rating))~v0/(1+exp(logk)*Distance),
                       fixed=list(v0~1,logk~1),
                       random=v0+logk~1|subnum,
                       data=trial_filtered_data_s, 
-                      start=c(v0=60
+                      start=c(v0=5
                               , logk=-1), 
                       control=c(nlmeControl(tol=.1, msMaxIter=5000)),
                       na.action = na.omit)
@@ -973,8 +975,8 @@ set.seed(1234)
 exponential_model_base<-nlme((as.numeric(max_rating))~v0*exp(-k*Distance), 
                  fixed=list(v0~1,k~1),
                  random=v0+k~1|subnum,
-                 data=trial_filtered_data, 
-                 start=c(v0=55, logk=1), 
+                 data=trial_filtered_data_s, 
+                 start=c(v0=5, logk=1), 
                  control=c(nlmeControl(tol=.1, msMaxIter=1000)),
                  na.action = na.omit)
 summary(exponential_model_base)
@@ -983,8 +985,8 @@ set.seed(1234)
 linear_model_base<-nlme((as.numeric(max_rating))~v0 +k*Distance,
                 fixed=list(v0~1, k~1),
                 random=v0+k~1|subnum,
-                data=trial_filtered_data,
-                start=c(v0=55,k=-4), 
+                data=trial_filtered_data_s,
+                start=c(v0=5,k=-4), 
                 control=c(nlmeControl(tol=.1)))
 
 summary(linear_model_base)
@@ -1106,7 +1108,7 @@ trial_filtered_data2 <- dplyr::left_join(
 
 AUC_long <- trial_filtered_data2 %>%
   group_by(subnum) %>%
-  summarise(AUC = trapz(as.numeric(Distance), as.numeric(max_rating))/990, .groups = "drop") %>%
+  summarise(AUC = trapz(as.numeric(Distance), as.numeric(max_rating))/1000, .groups = "drop") %>%
   left_join(
     trial_filtered_data2 %>%
       dplyr::distinct(subnum, .keep_all = TRUE) %>%
@@ -1132,7 +1134,7 @@ predictor_model<-nlme((as.numeric(max_rating))~v0/(1+exp(logk)*Distance),
                       fixed=list(v0~1,logk~as.numeric(Age)+as.numeric(Gender)),
                       random=v0+logk~1|subnum,
                       data=trial_filtered_data_s, 
-                      start=c(v0=10
+                      start=c(v0=5
                               , logk=-.1, -.01, -.01), 
                       control=c(nlmeControl(tol=.1, msMaxIter=5000)),
                       na.action = na.omit)
@@ -1149,7 +1151,7 @@ exponential_model_pred<-nlme((as.numeric(max_rating))~v0*exp(-k*Distance),
                  fixed=list(v0~1,k~as.numeric(Age)+as.numeric(Gender)),
                  random=v0+k~1|subnum,
                  data=trial_filtered_data_s, 
-                 start=c(v0=10, logk=.1,.01,-.1), 
+                 start=c(v0=5, logk=.1,.01,-.1), 
                  control=c(nlmeControl(tol=.1, msMaxIter=1000)),
                  na.action = na.omit)
 summary(exponential_model_pred)
@@ -1324,7 +1326,7 @@ if (exists("AUC_long")) {
   
   AUC_long <- trial_filtered_data3 %>%
     group_by(subnum) %>%
-    summarise(AUC = trapz(as.numeric(Distance), as.numeric(max_rating))/8000, .groups = "drop") %>%
+    summarise(AUC = trapz(as.numeric(Distance), as.numeric(max_rating))/1000, .groups = "drop") %>%
     left_join(
       trial_filtered_data3 %>%
         dplyr::distinct(subnum, .keep_all = TRUE) %>%
