@@ -408,7 +408,7 @@ The model estimates two parameters:
 - v0: baseline generosity (at social distance = 0)
 - logk: social discounting rate
 
-More negative logk values indicate steeper discounting across social distance.
+Higher (less negative) logk values indicate steeper discounting across social distance.
 
 #### Model 1: Base model (no predictors)
 This model estimates the hyperbolic social discounting function without including any predictors. It is used to obtain **participant-level discounting parameters**, including logk, which reflects the rate of social discounting.
