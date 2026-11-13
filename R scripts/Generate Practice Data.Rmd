@@ -1,0 +1,146 @@
+---
+title: "Social Discounting Toolkit: Generate Practice Datasets"
+author: "Naomi Nero & Abigail Marsh"
+date: "2026-11-12"
+output: html_document
+---
+
+This script creates the two simulated practice datasets used in `Social Discounting Package.Rmd`:
+
+- `SDlongform_exampledata.csv` (original Social Discounting Task)
+- `SDshortform_exampledata.csv` (Social Discounting Task: Short Form)
+
+Here, each simulated participant gets their own baseline generosity (`v0`) and discounting rate (`logk`), and their choices are generated from the hyperbolic model with response noise. 
+
+The datasets contain no real participant data. Running this script with the same seed always produces the same files.
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+library(dplyr)
+```
+
+# Settings
+
+```{r settings}
+seed  <- 20261110    # fixed seed: the same files are produced every time
+n_sub <- 120         # simulated participants per task version
+
+out_dir    <- "/Users/Documents/Social-Discounting-Manual/"    # folder to save the practice files in (this script's folder)
+file_long  <- file.path(out_dir, "SDlongform_exampledata.csv")
+file_short <- file.path(out_dir, "SDshortform_exampledata.csv")
+
+D        <- c(1, 2, 5, 10, 20, 50, 100)              # social distances
+amt_long <- c(80, 70, 60, 50, 40, 30, 20, 10, 0)     # amount forgone by sharing on trials 1-9
+
+# True-parameter distributions (same as Simulation Validation.Rmd)
+# Long form: Nero et al. (2025), N = 715
+#   v0 fixed at 86.22 (the v0 random-effect SD was ~0)
+#   logk M = -2.04, SD = 2.03, range -5.77 to 1.81 (values outside the range are truncated)
+true_long  <- list(v0_mean = 86.22, v0_sd = 0,  v0_min = 86.22, v0_max = 86.22,
+                   logk_mean = -2.04, logk_sd = 2.03, logk_min = -5.77, logk_max = 1.81,
+                   r_v0_logk = 0)
+# Short form: Amormino et al. (2026), replication study, N = 715
+#   v0 M = 5.53, SD = 2.35, range 0.28 to 11.06
+#   logk M = -3.71, SD = 1.72, range -6.92 to 0.30; r(v0, logk) = .55
+true_short <- list(v0_mean = 5.53, v0_sd = 2.35, v0_min = 0.28, v0_max = 11.06,
+                   logk_mean = -3.71, logk_sd = 1.72, logk_min = -6.92, logk_max = 0.30,
+                   r_v0_logk = 0.55)
+
+# Response noise (the "low" noise level in Simulation Validation.Rmd)
+#   long form:  tau = spread of the logistic choice rule; some participants will switch more than once
+#   short form: SD of normal noise added before rounding to whole dollars
+tau_long       <- 3
+sd_noise_short <- 0.5
+```
+
+# Data generators
+
+
+```{r generators}
+draw_true <- function(n, s) {
+  # correlated standard normal draws for v0 and logk (r = s$r_v0_logk)
+  z1 <- rnorm(n)
+  z2 <- s$r_v0_logk * z1 + sqrt(1 - s$r_v0_logk^2) * rnorm(n)
+  data.frame(subnum = 1:n,
+             v0   = pmin(pmax(s$v0_mean   + s$v0_sd   * z1, s$v0_min),   s$v0_max),
+             logk = pmin(pmax(s$logk_mean + s$logk_sd * z2, s$logk_min), s$logk_max))
+}
+
+# Qualtrics exports have 2 extra rows under the header (question text, ImportId).
+# The practice files include them so users see the same format as a real export.
+write_qualtrics_csv <- function(df, file) {
+  header_rows <- as.data.frame(rbind(
+    setNames(rep("Question text", ncol(df)), names(df)),
+    setNames(rep('{"ImportId":"QID"}', ncol(df)), names(df))))
+  out <- rbind(header_rows, as.data.frame(lapply(df, as.character)))
+  write.csv(out, file, row.names = FALSE, na = "")
+}
+
+# Long form: logistic choice rule around each participant's true amount willing to forgo
+sim_long <- function(n, tau) {
+  true <- draw_true(n, true_long)
+  rows <- lapply(seq_len(n), function(i) {
+    vals <- unlist(lapply(D, function(d) {
+      V <- true$v0[i] / (1 + exp(true$logk[i]) * d)
+      p <- if (tau == 0) as.numeric(amt_long < V) else plogis((V - amt_long) / tau)
+      share <- rbinom(9, 1, p)
+      val <- ifelse(share == 1, amt_long, 0)   # trials 1-8: 0 = kept, 80..10 = shared
+      if (share[9] == 0) val[9] <- -5          # trial 9: -5 = kept, 0 = shared
+      setNames(val, paste0("sd", d, "_", 1:9))
+    }))
+    c(subnum = i, vals)
+  })
+  list(wide = as.data.frame(do.call(rbind, rows)), true = true)
+}
+
+# Short form: give round(V + noise) dollars, limited to 0-10
+sim_short <- function(n, sd_noise) {
+  true <- draw_true(n, true_short)
+  give <- sapply(D, function(d) {
+    V <- true$v0 / (1 + exp(true$logk) * d)
+    pmin(pmax(round(V + rnorm(n, 0, sd_noise)), 0), 10)
+  })
+  wide <- data.frame(subnum = 1:n, give)
+  names(wide)[-1] <- paste0("X", 1:7, "_SDshort_decision")   # as R reads 1_SDshort_decision
+  list(wide = wide, true = true)
+}
+```
+
+# Generate and save
+
+```{r generate}
+set.seed(seed)
+long  <- sim_long(n_sub, tau_long)
+short <- sim_short(n_sub, sd_noise_short)
+
+write_qualtrics_csv(long$wide,  file_long)
+write_qualtrics_csv(short$wide, file_short)
+
+# The true (generating) parameters are saved too, so users can compare them with the toolkit's estimates
+write.csv(long$true,  file.path(out_dir, "SDlongform_exampledata_trueparameters.csv"),  row.names = FALSE)
+write.csv(short$true, file.path(out_dir, "SDshortform_exampledata_trueparameters.csv"), row.names = FALSE)
+```
+
+# Check the generated data
+
+The true parameters should vary across participants, and generosity should decline with social distance.
+
+```{r check}
+# True parameters
+summary(long$true[, c("v0", "logk")])
+summary(short$true[, c("v0", "logk")])
+
+# Long form: number of participants who switch more than once at one or more distances
+n_switches <- function(row) {
+  sapply(D, function(d) {
+    s <- as.numeric(row[paste0("sd", d, "_", 1:9)]) > 0 |
+         (seq_len(9) == 9 & as.numeric(row[paste0("sd", d, "_9")]) == 0)
+    sum(diff(s) != 0)
+  })
+}
+multi <- apply(long$wide, 1, function(r) any(n_switches(r) > 1))
+cat("Long-form participants with more than one switch at any distance:", sum(multi), "of", n_sub, "\n")
+
+# Short form: mean amount given at each social distance
+round(colMeans(short$wide[, -1]), 2)
+```
