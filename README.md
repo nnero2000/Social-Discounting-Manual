@@ -90,7 +90,7 @@ If you use this repository, please cite both the relevant methodological papers 
 If you use the R Markdown scripts, Shiny applications, Qualtrics templates, or Social Discounting Manual provided in this repository, please cite the software as:
 
 Nero, N., & Marsh, A. A. (2026). *An Open-Source Educational Toolkit for Administering and Analyzing Social
-  Discounting Tasks* (Version 1.0.0). https://doi.org/10.17605/OSF.IO/4UDWX 
+  Discounting Tasks* (Version 2.0.0). https://doi.org/10.17605/OSF.IO/4UDWX 
 
 ### Social Discounting Task (Original)
 
