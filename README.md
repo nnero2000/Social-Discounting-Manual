@@ -60,7 +60,9 @@ Tools for administering the tasks and collecting data that are pre-configured wi
   - Visualization  
 - Covers both:
   - Social Discounting Task (long form)  
-  - Social Discounting Task Short Form  
+  - Social Discounting Task Short Form
+
+- R Markdown sript for generating practice data based on published parameters. This data is then used in the analysis pipeline script above
 
 ---
 
