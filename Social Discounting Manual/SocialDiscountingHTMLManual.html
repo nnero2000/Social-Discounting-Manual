@@ -569,7 +569,7 @@
   <div class="shell">
     <aside class="rail">
       <div class="brand">Social Discounting Task Manual</div>
-      <div class="meta">Version 1.0.0 · April 2026<br />Naomi Nero & Abigail A. Marsh · Georgetown University</div>
+      <div class="meta">Version 2.0.0 · November 2026<br />Naomi Nero & Abigail A. Marsh · Georgetown University</div>
       <nav aria-label="Table of contents">
         <details open>
           <summary>Contents</summary>
@@ -577,13 +577,13 @@
             <li><a href="#general-remarks">General Remarks</a></li>
             <li><a href="#introduction">Introduction</a></li>
             <li><a href="#the-measures">The Measures</a></li>
-            <li><a href="#hyperbolic-function">The Hyperbolic Function</a></li>
+            <li><a href="#hyperbolic-function">Modeling Social Discounting: The Hyperbolic Function (logk and AUC)</a></li>
             <li><a href="#data-collection">Data Collection</a></li>
             <li><a href="#data-preparation">Data Preparation</a></li>
-            <li><a href="#data-cleaning">Cleaning &amp; Max Willing to Forgo</a></li>
+            <li><a href="#data-cleaning">Cleaning and Calculation of Maximum Willing to Forgo</a></li>
             <li><a href="#alternative-estimation">Alternative Estimation Approach for Missing Data</a></li>
             <li><a href="#hyperbolic-model">Hyperbolic Model</a></li>
-            <li><a href="#logk-auc">Extracting logk and AUC</a></li>
+            <li><a href="#logk-auc">Extraction of logk and AUC</a></li>
             <li><a href="#visualization">Visualization</a></li>
             <li><a href="#references">References</a></li>
           </ol>
@@ -593,7 +593,7 @@
 
     <main>
       <header class="hero">
-        <span class="eyebrow">Methods Manual · v1.0.0</span>
+        <span class="eyebrow">Methods Manual · v2.0.0</span>
         <h1>The Social Discounting Task Manual</h1>
         <p class="lede">
           Conceptual background, administration, and a step-by-step guide for
@@ -603,12 +603,12 @@
         <div class="hero-meta">
           <div><span>Authors</span><span>Naomi Nero & Abigail A. Marsh</span></div>
           <div><span>Affiliation</span><span>Georgetown University, Dept. of Psychology</span></div>
-          <div><span>Version</span><span>1.0.0 · April 2026</span></div>
+          <div><span>Version</span><span>2.0.0 · November 2026</span></div>
           <div><span>Contact</span><span><a href="mailto:nn444@georgetown.edu">nn444@georgetown.edu</a></span></div>
           <div><span>Citation</span>
             <span class="mono">
               Nero, N., & Marsh, A. A. (2026). An Open-Source Educational Toolkit for Administering and Analyzing Social
-              Discounting Tasks (Version 1.0.0). <a href="https://doi.org/10.17605/OSF.IO/4UDWX" target="_blank"> https://doi.org/10.17605/OSF.IO/4UDWX</a>
+              Discounting Tasks (Version 2.0.0). <a href="https://doi.org/10.17605/OSF.IO/4UDWX" target="_blank"> https://doi.org/10.17605/OSF.IO/4UDWX</a>
             </span>
           </div>
 
@@ -627,26 +627,8 @@
           <span class="section-num">01</span>
           <h2>General Remarks</h2>
         </div>
-        <p>
-          This manual provides conceptual background on the purpose of the
-          <strong>Social Discounting Task</strong> (Jones &amp; Rachlin, <a href="#jones2006" class="cite">2006</a>, <a href="#jones2009" class="cite">2009</a>), a
-          description of how the task is administered, and a step-by-step guide
-          for data cleaning and analysis. In addition to the original Social
-          Discounting Task, this manual includes background information, data
-          preparation procedures, and analytic steps for the <strong>Social Discounting
-          Task Short Form</strong> (Amormino et al., <a href="#amormino2025" class="cite">2025</a>, <a href="#amormino2026" class="cite">2026</a>).
-        </p>
-        <p>
-          It is designed to be used alongside the accompanying R Markdown
-          script, which walks users through the full data processing pipeline
-          for both versions of the task. The repository also includes
-          downloadable Qualtrics survey templates for the original and Short
-          Form, allowing researchers to easily implement the measures. These
-          templates are pre-formatted with the correct item and question names
-          that correspond with the R Markdown script. Altogether, these
-          materials are intended to support transparent, reproducible use of
-          social discounting paradigms in behavioral research.
-        </p>
+        <p>This manual provides conceptual background on the purpose of the Social Discounting Task (Jones &amp; Rachlin, <a href="#jones2006" class="cite">2006</a>, <a href="#jones2009" class="cite">2009</a>), a description of how the task is administered, and a step-by-step guide for data cleaning and analysis. In addition to the original Social Discounting Task, this manual includes background information, data preparation procedures, and analytic steps for the Social Discounting Task Short Form (Amormino et al., <a href="#amormino2025" class="cite">2025</a>, <a href="#amormino2026" class="cite">2026</a>).</p>
+        <p>This manual is designed to be used alongside the accompanying R Markdown script, which walks users through the full data processing pipeline for both versions of the task. The repository also includes downloadable Qualtrics survey templates for the original Social Discounting Task and the Social Discounting Task Short Form, allowing researchers to easily implement the measures. These Qualtrics survey templates can be uploaded into Qualtrics and already contain the correct item and question names that correspond with the R Markdown Script. Altogether, these materials are intended to support transparent, reproducible use of social discounting paradigms in behavioral research.</p>
       </section>
 
       <section id="introduction" class="block">
@@ -654,39 +636,13 @@
           <span class="section-num">02</span>
           <h2>Introduction</h2>
         </div>
-        <p>
-          The Social Discounting task was originally developed by <a href="#jones2006" class="cite">Jones &amp; Rachlin (2006)</a>
-          as a behavioral measure of how individuals value the
-          welfare of others as a function of social distance. In this paradigm,
-          participants make decisions about allocating monetary rewards between
-          themselves and another person who varies in closeness to them, or
-          social distance.
-        </p>
-        <p>
-          Conceptually, social discounting is closely related to temporal
-          discounting, which examines how people devalue rewards that occur in
-          the future compared to immediate rewards. In contrast, social discounting 
-          examines how individuals discount the subjective value of resources 
-          as a function of the social distance of the person the resources are 
-          shared with. The task, therefore, provides a behavioral index of 
-          generosity and the valuation of others' outcomes.
-        </p>
-        <p>
-          The Social Discounting Task has been used by many researchers
-          examining the relationship between social valuation and prosocial
-          behavior (<a href="#amormino2025" class="cite">Amormino et al., 2025</a>), individual differences in
-          personality and antisocial traits (<a href="#malesza2021" class="cite">Maleszka &amp; Kalinowski, 2021</a>;
-          <a href="#nero2025" class="cite">Nero et al., 2025</a>;
-          <a href="#romanowich2021" class="cite">Romanowich et al., 2021</a>;
-          <a href="#sharp2012" class="cite">Sharp et al., 2012</a>),
-          social relationships and perceived closeness (<a href="#rhoads2023" class="cite">Rhoads et al., 2023</a>;
-          <a href="#sherman2017" class="cite">Sherman &amp; Lynam, 2017</a>). 
-        </p>
-        
+        <p>The Social Discounting task was originally developed by Jones and Rachlin (<a href="#jones2006" class="cite">Jones &amp; Rachlin, 2006</a>) as a behavioral measure of how individuals value the welfare of others as a function of social distance. In this paradigm, participants make decisions about allocating monetary rewards between themselves and another person who varies in closeness to them, or social distance.</p>
+        <p>Conceptually, social discounting is closely related to temporal discounting, which examines how people devalue rewards that occur in the future compared to immediate rewards. In contrast, social discounting examines how individuals discount the subjective value of resources as a function of the social distance of the person the resources are shared with. The task, therefore, provides a behavioral index of generosity and the valuation of others' outcomes.</p>
+        <p>The Social Discounting Task has been used by many researchers examining the relationship between social valuation and prosocial behavior (<a href="#amormino2025" class="cite">Amormino et al., 2025</a>), individual differences in personality and antisocial traits (<a href="#malesza2021" class="cite">Malesza &amp; Kalinowski, 2021</a>; <a href="#nero2025" class="cite">Nero et al., 2025</a>; <a href="#romanowich2021" class="cite">Romanowich et al., 2021</a>; <a href="#sharp2012" class="cite">Sharp et al., 2012</a>), social relationships and perceived closeness (<a href="#rhoads2023" class="cite">Rhoads et al., 2023</a>; <a href="#sherman2017" class="cite">Sherman &amp; Lynam, 2017</a>).</p>
         <p>This manual provides guidance for implementing and analyzing two versions of the measure:</p>
         <ol>
           <li>The Original Social Discounting Task (<a href="#jones2006" class="cite">Jones &amp; Rachlin, 2006</a>)</li>
-          <li>The Social Discounting Task Short Form (<a href="#amormino2025" class="cite">Amormino et al., 2025</a>), a shorter, more efficient version of the task</li>
+          <li>The Social Discounting Task Short Form (<a href="#amormino2025" class="cite">Amormino et al., 2025</a>), which was developed to provide a shorter, more efficient version of the task</li>
         </ol>
       </section>
 
@@ -695,27 +651,9 @@
           <span class="section-num">03</span>
           <h2>The Measures</h2>
         </div>
-
-        <h3>The Original Social Discounting Task</h3>
-        <p>
-          The Social Discounting Task asks participants to imagine a list of
-          100 people, with position #1 being the person closest to them and
-          position #100 being a stranger. Participants are then asked to
-          provide the name and relationship of real individuals they know who
-          correspond to seven specific social distances
-          (<span class="var">N = 1, 2, 5, 10, 20, 50, 100</span>).
-        </p>
-        <p>
-          For each of the seven names provides (corresponding to seven social distances), participants make a series of
-          nine dichotomous choices. In each choice, participants can select a
-          selfish option (keep money for themselves) or a generous option
-          (share money with the person at the specified social distance). For
-          each social distance, the selfish option begins with the participant
-          keeping <strong>$155</strong>, and the amount decreases by $10 across
-          nine decisions, ending with the option to keep <strong>$75</strong>.
-          Alternatively, participants may choose the generous option of
-          splitting <strong>$150</strong> with the social distance.
-        </p>
+        <h3><em>The Original Social Discounting Task</em></h3>
+        <p>The Social Discounting Task asks participants to imagine a list of 100 people, with position #1 being the person closest to them and position #100 being a stranger. Participants are then asked to provide the name and relationship of real individuals they know who correspond to seven specific social distances (N = 1, 2, 5, 10, 20, 50, and 100).</p>
+        <p>For each of the seven names provided (corresponding to seven social distances), participants make a series of nine dichotomous choices (Figure 1 from <a href="#nero2025" class="cite">Nero et al., 2025</a>). In each choice, participants can select a selfish option, in which they keep money for themselves, or a generous option, in which money is shared with the person at the specified social distance. For each social distance, the selfish option begins with the participant keeping <span class="money">$155</span>, and the amount decreases by <span class="money">$10</span> across nine decisions, ending with the option to keep <span class="money">$75</span>. Alternatively, participants may choose the generous option of splitting <span class="money">$150</span> with the social distance. Thus, across the decision sequence, participants choose between keeping a progressively smaller amount for themselves or opting for a consistent equal split with the other person at the specified social distance.</p>
 
         <div class="card trial-card">
           <div class="card-label">Figure 1 · example trial (original task)</div>
@@ -774,52 +712,12 @@
           </div>
         </div>
 
-        <p>
-          These choices allow for the calculation of the "indifference point",
-          defined as the point at which participants switch from choosing the
-          selfish option to choosing the generous option. From this indifference
-          point, the maximum amount of money the individual is willing to forgo for that social distance
-          is generated by subtracting <span class="money">$75</span> from the indifference point for each
-          block for each participant. For example, if someone switched from
-          being selfish to being generous at the second trial when offered to
-          keep <span class="money">$145</span> or split <span class="money">$150</span>, the participant has sacrificed <span class="money">$70</span> (<span class="money">$145</span> −
-          <span class="money">$75</span>), representing the maximum amount willing to forgo. This results
-          in 7 "maximum amount willing to forgo" values, one for each social
-          distance, for each participant. These seven values are later used to
-          estimate the social discounting function using a hyperbolic model.
-        </p>
-        <p>
-          For participants who chose the selfish option for all the trials for
-          the social distance, the indifference point is assumed at the final
-          trial (<span class="money">$75</span>) and the amount willing to forgo is <span class="money">$0</span>. For participants
-          who chose the generous option for all trials in the block, the
-          indifference point is assumed at the first trial (<span class="money">$155</span>) and the
-          amount willing to forgo is <span class="money">$80</span>.
-        </p>
+        <p>These choices allow for the calculation of the "indifference point", defined as the point at which participants switch from choosing the selfish option to choosing the generous option. From this indifference point, the maximum amount of money the individual is willing to forgo for that social distance is generated by subtracting <span class="money">$75</span> from the indifference point for each block for each participant. For example, if someone switched from being selfish to being generous at the second trial when offered to keep <span class="money">$145</span> or split <span class="money">$150</span>, the participant has sacrificed <span class="money">$70</span> (<span class="money">$145</span> - <span class="money">$75</span>), representing the maximum amount willing to forgo. This results in 7 "maximum amount willing to forgo", one for each social distance, for each participant. These seven values are later used to estimate the social discounting function using a hyperbolic model (see Data analysis section).</p>
+        <p>For participants who choose the selfish option for all the trials for the social distance, the indifference point is assumed at the final trial (<span class="money">$75</span>) and the amount willing to forgo is <span class="money">$0</span>. For participants who chose the generous option for all trials in the block, the indifference point is assumed at the first trial (<span class="money">$155</span>) and the amount willing to forgo is <span class="money">$80</span>.</p>
 
-        <h3>Social Discounting Task Short Form</h3>
-        <p>
-          Although the original Social Discounting Task has produced robust
-          findings (Amormino et al., <a href="#amormino2025" class="cite">2025</a>), completing the task requires answering 9 questions for each 
-          of 7 social distances (63 questions total). The Social Discounting 
-          Short Form was therefore developed to provide a more efficient version of the measure.
-        </p>
-        <p>
-          Participants are still instructed to imagine a list of 100 people and
-          then provide the names and relationships corresponding to seven
-          social distances (<span class="var">N = 1, 2, 5, 10, 20, 50, 100</span>).
-          However, rather than making 7 decisions per social distance,
-          participants make a single decision for each distance. This reduces
-          the total number of decisions from 63 to 7 and shortens completion
-          time. For each social distance, participants decide how to split <span class="money">$10</span>
-          between themselves and the social distance. Response options range
-          from keeping all <span class="money">$10</span> and giving <span class="money">$0</span> to the other person, to giving the
-          full <span class="money">$10</span> to the other person. Importantly, unlike the original task,
-          participants have the option to give more to the other person than
-          they keep for themselves. From these seven decisions, the maximum
-          amount willing to forgo is calculated as <span class="var">$10 −
-          the amount kept</span> for each social distance.
-        </p>
+        <h3><em>Social Discounting Task Short Form</em></h3>
+        <p>Although the original Social Discounting Task has produced robust findings (<a href="#amormino2025" class="cite">Amormino et al., 2025</a>), completing the task requires answering 9 questions for each of 7 social distances (63 questions total). The Social Discounting Short Form was therefore developed to provide a more efficient version of the measure.</p>
+        <p>Participants are still instructed to imagine a list of 100 people and then provide the names and relationships corresponding to seven social distances (N = 1, 2, 5, 10, 20, 50, 100). However, rather than making 9 decisions per social distance, participants make a single decision for each distance. This reduces the total number of decisions from 63 to 7 and shortens completion time. For each social distance, participants decide how to split <span class="money">$10</span> between themselves and the social distance. Response options range from keeping all <span class="money">$10</span> and giving <span class="money">$0</span> to the other person, to giving the full <span class="money">$10</span> to the other person. Importantly, unlike the original Social Discounting Task, participants have the option to give more to the other person than they keep for themselves. From these seven decisions, the maximum amount willing to forgo is calculated as <span class="money">$10</span> – the amount kept for each social distance. These values are then used to estimate the hyperbolic social discounting function.</p>
 
         <div class="card trial-card">
           <div class="card-label">Figure 2 · example trial (short form)</div>
@@ -892,60 +790,26 @@
       <section id="hyperbolic-function" class="block">
         <div class="section-head">
           <span class="section-num">04</span>
-          <h2>Modeling Social Discounting: The Hyperbolic Function</h2>
+          <h2>Modeling Social Discounting: The Hyperbolic Function (logk and AUC)</h2>
         </div>
-        <p>
-          Social discounting is typically modeled using a hyperbolic discounting
-          function, which describes how the value assigned to another person
-          decreases as social distance increases. The hyperbolic model is
-          defined as:
-        </p>
+        <p>Social discounting is typically modeled using a hyperbolic discounting function, which describes how the value assigned to another person decreases as social distance increases. The hyperbolic model is defined as:</p>
         <div class="formula">
           $$ V \;=\; \frac{V_0}{1 + k\,N} $$
         </div>
         <p>Where:</p>
         <ul>
-          <li><span class="var">V</span> — amount willing to forgo at a given social distance</li>
-          <li><span class="var">V₀</span> — model-implied intercept representing baseline generosity (i.e., predicted value at N = 0)</li>
-          <li><span class="var">k</span> — the social discounting rate</li>
-          <li><span class="var">N</span> — social distance</li>
+          <li><span class="var">V</span> = amount willing to forgo at a given social distance</li>
+          <li><span class="var">V₀</span> = model-implied intercept representing baseline generosity (i.e., predicted value at N = 0)</li>
+          <li><span class="var">k</span> = the social discounting rate</li>
+          <li><span class="var">N</span> = social distance</li>
         </ul>
-        <p>
-          The parameter <span class="var">V₀</span> represents the intercept, or the amount of 
-          money willing to forgo when N = 0. In this analysis pipeline, social distances begin at N = 1. 
-          As a result, <span class="var">V₀</span> is not directly observed in the data 
-          but is instead estimated as the extrapolated intercept of the fitted hyperbolic function. 
-          The parameter <span class="var">k</span> reflects how steeply
-          generosity declines as social distance increases. Higher
-          <span class="var">k</span> values indicate steeper discounting; lower
-          values indicate shallower discounting. Because <span class="var">k</span>
-          is constrained to be positive and is often highly skewed, it is
-          typically estimated on the log scale and reported as
-          <span class="var">logk</span>. In the model implementation used here,
-          <span class="var">logk</span> is estimated and then exponentiated
-          (i.e., <span class="var">k = exp(logk)</span>) to ensure that
-          <span class="var">k</span> remains positive.
-        </p>
+        <p><span class="var">V₀</span> represents the intercept, or the amount of money willing to forgo when N = 0. In this analysis pipeline, social distances begin at N = 1. As a result, <span class="var">V₀</span> is not directly observed in the data but is instead estimated as the extrapolated intercept of the fitted hyperbolic function. The parameter <span class="var">k</span> reflects how steeply generosity declines as social distance increases, or how steeply the value assigned to others declines as social distance increases. Higher <span class="var">k</span> values indicate steeper discounting, while lower <span class="var">k</span> values indicate shallower discounting. Because <span class="var">k</span> is constrained to be positive and is often highly skewed, it is typically estimated on the log scale and reported as <span class="var">logk</span>. In the model implementation used here, <span class="var">logk</span> is estimated and then exponentiated (i.e., <span class="var">k = exp(logk)</span>) to ensure that <span class="var">k</span> remains positive.</p>
         <div class="callout">
-          <p><strong>Interpreting logk.</strong> A more <em>negative</em> logk indicates <em>shallower</em> social discounting (greater generosity across social distances). A more <em>positive</em> logk indicates <em>steeper</em> social discounting (generosity declining more quickly with distance).</p>
+          <p>When interpreting <span class="var">logk</span>, a more negative <span class="var">logk</span> indicates shallower social discounting (greater generosity across social distances), while a more positive <span class="var">logk</span> indicates steeper social discounting (generosity declining more quickly with distance).</p>
         </div>
-        <p>
-          In addition to estimating <span class="var">k</span>, researchers
-          often compute the <strong>Area Under the Curve (AUC)</strong>. AUC is
-          a model-free measure of social discounting and represents the overall
-          generosity across all social distances. It is computed by plotting the
-          amount willing to forgo at each social distance and computing the
-          total area under the resulting discounting curve. AUC values range
-          from 0 to 1, with higher values indicating greater generosity
-          (shallower discounting) and lower values indicating less generosity
-          (steeper discounting).
-        </p>
-        <p>
-          Both logk and AUC capture the same underlying construct: logk is
-          model-based, AUC is model-free. logk represents the rate at which
-          social valuation changes with social distance, whereas AUC represents
-          overall social valuation across all social distances.
-        </p>
+        <p>The accompanying R Markdown script demonstrates how to estimate <span class="var">logk</span> for each participant using the indifference points and the maximum amount willing to forgo.</p>
+        <p>In addition to estimating the hyperbolic discounting parameter <span class="var">k</span>, researchers often compute the Area under the curve (AUC). AUC is a model-free measure of social discounting and represents the overall generosity across all social distances. This is calculated by plotting the amount willing to forgo at each social distance and computing the total area under the resulting discounting curve. AUC values range from 0 to 1 with higher AUC values indicating greater generosity (shallower discounting) and lower AUC values indicating less generosity (steeper discounting).</p>
+        <p>Both <span class="var">logk</span> and AUC capture the same underlying social discounting construct, with <span class="var">logk</span> being model-based and AUC being model-free. Additionally, <span class="var">logk</span> represents the rate at which social valuation changes with social distance, while AUC represents overall social valuation across all social distances.</p>
       </section>
 
       <section id="data-collection" class="block">
@@ -953,51 +817,24 @@
           <span class="section-num">05</span>
           <h2>Data Collection</h2>
         </div>
-        <p>
-          This repository provides two mechanisms for collecting data for both
-          the original and short-form tasks that work with the provided R
-          Markdown analysis scripts: (1) Qualtrics survey templates and (2)
-          R-based Shiny applications. This manual corresponds to the Qualtrics
-          Templates, Shiny Applications, and R Markdown scripts version 1.0.0.
-        </p>
+        <p>In this repository, we provide two mechanisms for collecting data for both the Original Social Discounting Task and the Social Discounting Task Short Form that can be used with the provided R Markdown Analysis scripts: (1) Qualtrics survey templates and (2) R-based Shiny applications. This manual corresponds to the Qualtrics Templates and Shiny Applications Version 1.0.0, and the R Markdown script Version 2.0.0.</p>
 
         <h3>Qualtrics Templates</h3>
-        <p>
-          Downloadable Qualtrics survey templates are provided for both
-          versions of the task. These templates are pre-formatted with the
-          correct item structure and variable names, allowing for
-          straightforward implementation. Once uploaded into Qualtrics, the
-          surveys can be used without further modification, and response data
-          will align directly with the accompanying analysis scripts.
-        </p>
+        <p>We provide downloadable Qualtrics survey templates for both versions of the task. These templates are pre-formatted with the correct item structure and variable names, allowing for straightforward implementation. Once uploaded into Qualtrics, the surveys can be used without further modification, and response data will align directly with the accompanying analysis scripts provided in this repository.</p>
 
         <h3>Shiny Applications</h3>
-        <p>
-          We also provide R code to run custom Shiny applications for both the
-          original task and the Short Form. These are interactive web-based
-          implementations developed in R using the Shiny framework. They
-          standardize task presentation, automate progression, and directly
-          record participant responses in a structured format that corresponds
-          with the analysis scripts.
-        </p>
-        <p>
-          To run the applications locally, open the corresponding R script in
-          RStudio and click "Run App" (or execute
-          <code>shiny::runApp()</code> from the console). Each application
-          guides participants through the full task sequence:
-        </p>
+        <p>We also provide R code to run custom Shiny applications for both the Original Social Discounting Task and the Short Form.</p>
+        <p>The Shiny applications are interactive web-based implementations of the task developed in R using the Shiny framework. They are designed to standardize task presentation, automate progression through the task, and directly record participant responses in a structured format that corresponds with the analysis scripts.</p>
+        <p>To run the applications locally, users should open the corresponding R script in RStudio and click "Run App" (or execute <code>shiny::runApp()</code> from the console). This will launch the application in a web browser window where participants can complete the task.</p>
+        <p>Each application guides participants through the full task sequence, including:</p>
         <ul>
           <li>Entry of a participant identifier by the researcher</li>
           <li>Instruction screens</li>
           <li>Entry of social distance names and relationships</li>
           <li>Decision-making trials for each social distance condition</li>
         </ul>
-        <p>
-          Upon completion, the application automatically exports a
-          <code>.csv</code> file containing participant responses in wide
-          format that can be combined with those from other participants and
-          then used in the analysis scripts.
-        </p>
+        <p>Upon completion, the application automatically exports a <code>.csv</code> file containing participant responses in wide format that can be combined with those from other participants and then used in the analysis scripts.</p>
+        <p>Together, these tools provide flexible options for both traditional survey-based implementation (Qualtrics) and fully programmatic, locally hosted data collection (Shiny).</p>
       </section>
 
       <section id="data-preparation" class="block">
@@ -1005,47 +842,36 @@
           <span class="section-num">06</span>
           <h2>Data Preparation</h2>
         </div>
-        <p>
-          The following sections describe tips for preparing, cleaning, and
-          analyzing social discounting data. The procedures are based on the
-          outputs from the Qualtrics templates or Shiny apps, but steps can be
-          modified or adapted for datasets collected using other survey
-          formats. This section covers:
-        </p>
+        <p>Up to this point, we have described the conceptual basis of the Social Discounting Task, the two task versions, and how social discounting is modeled using hyperbolic functions to generate <span class="var">logk</span> or AUC. The following sections describe tips for preparing, cleaning, and analyzing social discounting data. The procedures are based on the outputs from the Qualtrics templates or Shiny Apps, using R Markdown scripts provided with this manual, but steps can be modified or adapted for datasets collected using other survey formats.</p>
+        <p>This section covers:</p>
         <ol>
           <li>Overview of expected data structure</li>
-          <li>Data cleaning procedures</li>
+          <li>Data Cleaning procedures and quality checks</li>
           <li>Calculation of indifference points and maximum amount willing to forgo</li>
           <li>Hyperbolic Model (and comparison to exponential and linear models)</li>
           <li>Extraction of logk and AUC</li>
         </ol>
 
         <h3>Data Overview</h3>
-        <p>
-          Using the provided Qualtrics templates or Shiny Apps ensures the
-          correct structure automatically, but if you create your own survey,
-          following these conventions is necessary for the scripts to work
-          properly.
-        </p>
+        <p>This subsection describes the <strong>expected data structure and variable naming</strong> required by the R Markdown data cleaning and analysis scripts. Using the provided Qualtrics templates or Shiny Apps ensures the correct structure automatically, but if you create your own survey, following these conventions is necessary for the scripts to work properly.</p>
         <ul>
-          <li><strong>CSV format:</strong> export from Qualtrics as a CSV file with response values, not labels.</li>
-          <li><strong>Subject identifier:</strong> column <code>subnum</code> should contain unique participant IDs. Participants without a value in <code>subnum</code> will be removed during data cleaning.</li>
+          <li><u>CSV Format:</u> Export from Qualtrics as a CSV file with response values, not labels. Qualtrics CSV exports include two extra rows below the variable names (the question text and an import ID row). The R script removes these rows automatically and converts the participant ID and response columns to numeric values, so the file can be used as exported.</li>
+          <li><u>Subject Identifier:</u> column <code>subnum</code> should contain unique participant IDs. Participants without a value in <code>subnum</code> will be removed during data cleaning.</li>
         </ul>
         <div class="callout">
-          <p><strong>Note.</strong> The Qualtrics templates have a question where a participant ID can be entered manually; however, Qualtrics can also randomly generate participant IDs (added in the survey flow) or embed IDs into the survey link.</p>
+          <p>Note: The Qualtrics templates have a question where a participant ID can be entered in manually; however, Qualtrics can also randomly generate participant IDs (added in the survey flow) or embed IDs into the survey link.</p>
         </div>
 
         <h3>Social Discounting Task: Trial Naming and Variables</h3>
-        <p>
-          Trials from the original social discounting task follow the naming
-          convention <code>sd[distance]_[trial]</code>, where
-          <em>distance</em> is social distance (1, 2, 5, 10, 20, 50, 100) and
-          <em>trial</em> is the trial number within that social discounting
-          block (1–9).
-        </p>
+        <p>Trials from the original social discounting task follow the naming convention: <code>sd[distance]_[trial]</code>, where</p>
+        <ul>
+          <li>distance is social distance (1, 2, 5, 10, 20, 50, 100)</li>
+          <li>trial is the trial number within that social discounting block (1-9)</li>
+        </ul>
+        <p>The outline of the trial variable names is below:</p>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Social distance</th><th>Trial variables</th></tr></thead>
+            <thead><tr><th>Social Distance</th><th>Trial Variables</th></tr></thead>
             <tbody>
               <tr><td>1</td><td><code>sd1_1 – sd1_9</code></td></tr>
               <tr><td>2</td><td><code>sd2_1 – sd2_9</code></td></tr>
@@ -1057,94 +883,77 @@
             </tbody>
           </table>
         </div>
-        <h4>Response coding</h4>
-        <p>
-          Responses are recoded in Qualtrics. For trials 1–8,
-          <code>0</code> indicates the participant kept the larger sum of money
-          for themselves, while positive values (10–80) indicate the participant shared the money.
-          These positive values are calculated by subtracting 75 from the
-          amount offered to keep for themselves, generating the <strong>amount willing to forgo</strong>
-          that trial (e.g., <span class="money">$155</span> for you, or give <span class="money">$75</span> and keep <span class="money">$75</span>, is recoded
-          to 80). For Trial 9 (keep <span class="money">$75</span> for yourself, or give <span class="money">$75</span> to N and
-          keep <span class="money">$75</span>), <code>-5</code> indicates the participant kept the money
-          and <code>0</code> indicates they shared. These recoded values are
-          used to calculate the indifference point and the maximum amount
-          willing to forgo.
-        </p>
+        <h4><em>Response coding</em></h4>
+        <p>Responses are recoded in Qualtrics. For trials 1-8, 0 indicates the participant kept the larger sum of money for themselves, while positive values (10-80) indicate the participant shared the money, choosing the <span class="money">$75</span>/75 split. These positive values are calculated by subtracting 75 from the amount offered to keep for themselves, generating the amount willing to forgo for that trial (ex: <span class="money">$155</span> for you, or give <span class="money">$75</span> and keep <span class="money">$75</span> is recoded to 80). For Trial 9 (keep <span class="money">$75</span> for yourself, or give <span class="money">$75</span> to N and keep <span class="money">$75</span>), -5 indicates the participant kept the money, and 0 indicates they shared money. These recoded values are used to calculate the indifference point in R and the maximum amount willing to forgo.</p>
 
-        <h3>Short Form: Trial Naming and Variables</h3>
-        <p>
-          Trials from the Social Discounting Task Short Form follow the naming
-          convention <code>X[block number]_SDshortdecision</code>, where the
-          block number corresponds to social distance (block 1 = N1, block 2 =
-          N2, block 3 = N5, block 4 = N10, block 5 = N20, block 6 = N50, block
-          7 = N100).
-        </p>
-        <h4>Response coding</h4>
-        <p>
-          Responses are recoded in Qualtrics and each social distance has one
-          response value. Response options are recoded to reflect the amount
-          given to the N for that choice (e.g., keep <span class="money">$10</span> and give <span class="money">$0</span> is
-          recoded to 0).
-        </p>
+        <h3>Social Discounting Task Short Form: Trial Naming and Variables</h3>
+        <p>Trials from the social discounting task short form follow the naming convention:</p>
+        <p><code>[block number]_SDshort_decision</code>, where:</p>
+        <ul>
+          <li>block number is social distance (block 1 = N1, block 2 = N2, block 3 = N5, block 4 = N10, block 5 = N20, block 6 = N50, block 7 = N100)</li>
+        </ul>
+        <p>When the file is read into R, an X is added to the start of each variable name (e.g., <code>1_SDshort_decision</code> becomes <code>X1_SDshort_decision</code>) because R variable names cannot start with a number. The R script uses these X-prefixed names.</p>
+        <h4><em>Response coding</em></h4>
+        <p>Responses are recoded in Qualtrics and each social distance has one response value. Response options are recoded to reflect the amount given to the N for that choice (ex: keep <span class="money">$10</span> and give <span class="money">$0</span> is recoded to be 0).</p>
       </section>
 
       <section id="data-cleaning" class="block">
         <div class="section-head">
           <span class="section-num">07</span>
-          <h2>Data Cleaning &amp; Maximum Willing to Forgo</h2>
+          <h2>Cleaning and Calculation of Maximum Willing to Forgo</h2>
         </div>
-
         <h3>Social Discounting Task</h3>
-        <p>
-          Using the answer choices in Qualtrics with the recoded values, the
-          following steps describe the data cleaning procedures to calculate
-          participant-level indifference points and the maximum amount willing
-          to forgo.
-        </p>
+        <p>Using the answer choices in Qualtrics with the recoded values, the following steps describe the data cleaning procedures to calculate participant-level indifference points and the maximum amount willing to forgo.</p>
         <ol>
-          <li><strong>Reshape data (wide to long).</strong> Raw Qualtrics exports contain each trial as a separate column (e.g., <code>sd1_1</code>, <code>sd10_5</code>). To facilitate trial-level processing, the data are converted from wide format to long format. In the long format, each row corresponds to a single trial observation, such that the participant identifier (subnum) is repeated for the total number of trials. After reshaping, the <code>trial</code> column contains the item or trial name (e.g., sd1_1) and the <code>choice</code> column contains the participant's response.</li>
-          <li><strong>Split trial information.</strong> Each trial name contains two pieces of information: social distance and trial number within the distance block. These are split into separate columns (<code>distance</code> and <code>amount1</code>).</li>
-          <li><strong>Recode choice values.</strong> Most trials are coded as 0 = kept and a positive value (10–80) = shared. Trial 9 uses −5 = kept and 0 = shared. To simplify calculation of the crossover point, −5 is temporarily recoded to 5.</li>
-          <li><strong>Remove invalid/missing responses.</strong> Ideally for datasets with minimal missingness, rows with missing responses  are removed and all <code>choice</code> values are confirmed to be numeric. Only rows with <code>choice</code> ≥ 0 are retained (after recoding −5 to 5).</li>
-          <li><strong>Convert social distance labels to numeric.</strong> Distance labels (<code>sd1</code>, <code>sd2</code>, …) are converted to numeric values (1, 2, …) in a new column called <code>Distance</code>.</li>
-          <li><strong>Compute indifference points and maximum amount willing to forgo.</strong> For each participant and social distance, identify the maximum choice for that distance. This represents the crossover point where the participant switched from keeping money. Either a switch from a positive number (10–80) to 0, or a switch from 0 to 5 (if the participant kept money for all trials). The maximum choice value for that distance is stored in a new column called <code>max_rating</code>. Any temporary 5 values are converted back to −5 to distinguish participants who kept money on all trials as having their maximum willing to forgo at the last trial. The output is a dataframe called <code>trial_filtered_data</code> containing one row per participant per social distance, with the value under <code>max_rating</code> representing the maximum amount willing to forgo.</li>
+          <li>Reshape Data (wide to long)
+            <p>Raw Qualtrics exports contain each trial as a separate column (e.g., <code>sd1_1</code>, <code>sd10_5</code>). To facilitate trial-level processing, the data are converted from wide format to long format. In the long format, each row corresponds to a single trial observation, such that the participant identifier (<code>subnum</code>) is repeated for the total number of trials. After reshaping, the <code>trial</code> column contains the item or trial name (e.g., <code>sd1_1</code>) and the <code>choice</code> column contains the participant's response.</p></li>
+          <li>Split trial information
+            <p>Each trial name contains two pieces of information: social distance (<code>sd1</code>, <code>sd2</code>) and the trial number within the distance block. These are split into separate columns (<code>distance</code> and <code>amount1</code>).</p></li>
         </ol>
-
-        <h4>Reference table — amounts offered to keep</h4>
+        <h4>Reference Table for Amounts Offered to Keep</h4>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Trial number</th><th>Amount offered</th></tr></thead>
+            <thead><tr><th>Trial Number</th><th>Amount Offered</th></tr></thead>
             <tbody>
-              <tr><td>1</td><td>$155</td></tr>
-              <tr><td>2</td><td>$145</td></tr>
-              <tr><td>3</td><td>$135</td></tr>
-              <tr><td>4</td><td>$125</td></tr>
-              <tr><td>5</td><td>$115</td></tr>
-              <tr><td>6</td><td>$105</td></tr>
-              <tr><td>7</td><td>$95</td></tr>
-              <tr><td>8</td><td>$85</td></tr>
-              <tr><td>9</td><td>$75</td></tr>
+              <tr><td>1</td><td>155</td></tr>
+              <tr><td>2</td><td>145</td></tr>
+              <tr><td>3</td><td>135</td></tr>
+              <tr><td>4</td><td>125</td></tr>
+              <tr><td>5</td><td>115</td></tr>
+              <tr><td>6</td><td>105</td></tr>
+              <tr><td>7</td><td>95</td></tr>
+              <tr><td>8</td><td>85</td></tr>
+              <tr><td>9</td><td>75</td></tr>
             </tbody>
           </table>
         </div>
-
+        <ol start="3">
+          <li>Quality Check
+            <p>Before indifference points are calculated, the R script checks each participant at each social distance for missing or inconsistent responses. Each response is recoded as kept (0) or shared (1), and two values are counted: <code>n_trials</code>, the number of valid responses (should be 9), and <code>n_switches</code>, the number of times the participant changes between keeping and sharing (0 = always kept or always shared, 1 = the expected single switch, 2 or more = inconsistent responding). The script lists any participant and social distance with fewer than 9 valid trials or more than one switch. If nothing is listed, the data are complete and consistent. Flagged cases should be inspected before continuing. Researchers can keep them, exclude them, or use the logistic regression approach described in <a href="#alternative-estimation">Alternative Estimation Approach for Missing Data</a>. We recommend reporting the number of flagged participants in the Methods section.</p></li>
+          <li>Recode Choice Values
+            <p>As previously described, most trials are coded in Qualtrics as 0 = participant kept the money and a positive value (10-80) = participant shared the money. Trial 9 (final trial) uses -5 = participant kept the money and 0 = participant shared the money. To simplify the calculation of the crossover point, -5 is temporarily recoded to 5. This ensures that participants who keep money on all trials are correctly identified as having their maximum willing to forgo at the last trial.</p></li>
+          <li>Remove Invalid/Missing Responses
+            <p>Ideally for datasets with minimal missingness, rows with missing responses are removed. Only rows with <code>choice</code> greater than or equal to 0 are retained (after recoding -5 to 5). This ensures that only valid trials are considered when calculating indifference points.</p></li>
+          <li>Convert Social Distance Labels to Numeric
+            <p>Distance labels (<code>sd1</code>, <code>sd2</code>, etc) are converted to numeric values (1, 2, etc) in a new column called <code>Distance</code>. Any label that does not match one of the seven social distances is set to missing (<code>NA</code>) rather than to a number, so it cannot enter the model as a real social distance.</p></li>
+          <li>Compute Indifference Points and Maximum Amount Willing to Forgo
+            <p>For each participant and social distance, we first identify the maximum choice for that distance. This represents the crossover point where the participant switched from keeping money. This will either be a switch from a positive number (10-80) to 0, or a switch from 0 to 5 (if the participant kept the money for all of the trials). The maximum choice value for that distance is stored in a new column called <code>max_rating</code>. Any temporary 5 values are converted back to -5 to distinguish participants who kept money on all trials. The output is a dataframe called <code>trial_filtered_data</code> which contains one row per participant per social distance, with the value under <code>max_rating</code> representing the maximum amount willing to forgo. This cleaned dataset is ready for estimating hyperbolic discounting parameters (<span class="var">logk</span>) or AUC in subsequent analysis steps.</p></li>
+        </ol>
         <div class="callout">
-          <p><strong>Note.</strong> Alternative methods exist for participants who switch back and forth multiple times, but this approach uses the first crossover to standardize calculations.</p>
+          <p><em>Note</em>: Alternative methods exist for participants who switch back and forth multiple times, but this approach uses the first crossover to standardize calculations. The Quality Check step identifies participants who switch more than once so they can be inspected or reported.</p>
         </div>
 
-        <h3>Short Form</h3>
-        <p>
-          Data cleaning for the Short Form is more straightforward than the
-          original task because participants make only one decision per social
-          distance, reducing the total number of trials from 63 to 7 and
-          eliminating the need to calculate indifference points.
-        </p>
+        <h3>Social Discounting Task Short Form</h3>
+        <p>Data cleaning for the Social Discounting Task Short form is more straightforward than the original task because participants make only one decision per social distance, reducing the total number of trials from 63 to 7 and eliminating the need to calculate the indifference point. The following steps describe how to convert raw Qualtrics exports to generate participant-level maximum amount willing to forgo for each social distance.</p>
         <ol>
-          <li><strong>Reshape data (wide to long).</strong> Raw exports contain one column per social distance decision (e.g., <code>X1_SDshort_decision</code>). To facilitate trial-level processing, the data are converted from wide format to long format. In the long format, each row corresponds a single decision for a single participant. After reshaping, <code>trial</code> contains the trial name and <code>max_rating</code> contains the participant's response for that social distance.</li>
-          <li><strong>Split trial information.</strong> The trial name is split into <code>distance</code> (e.g., <code>X1</code>) and <code>amount1</code> (every row will have <code>SDshort_decision</code>).</li>
-          <li><strong>Remove invalid/missing responses.</strong> Ideally for datasets with minimal missingness, rows with missing responses  are removed and <code>max_rating</code> is confirmed numeric. Only rows with max_rating ≥ 0 are retained.</li>
-          <li><strong>Convert social distance labels to numeric.</strong> Using the table below.</li>
+          <li>Reshape Data (wide to long)
+            <p>Raw exports contain one column per social distance decision (e.g., <code>X1_SDshort_decision</code>). To facilitate trial-level processing, the data are converted from wide format to long format. In the long format, each row corresponds to a single decision for a single participant. After reshaping <code>trial</code> column contains the trial name, and the <code>max_rating</code> column contains the participant's response for that social distance.</p></li>
+          <li>Split trial information
+            <p>The social distance label (e.g., <code>X1</code>) is taken from the trial name and stored in a new column called <code>distance</code>.</p></li>
+          <li>Remove Invalid/Missing Responses
+            <p>Ideally for datasets with minimal missingness, rows with missing responses are removed. Only rows with <code>max_rating</code> between 0 and 10 are retained.</p></li>
+          <li>Convert Social Distance Labels to Numeric
+            <p>The social distance labels (<code>X1</code> to <code>X7</code>) are converted to numeric values:</p></li>
         </ol>
         <div class="table-wrap">
           <table>
@@ -1160,13 +969,11 @@
             </tbody>
           </table>
         </div>
-        <p>
-          In the Short Form, each decision directly represents the amount the
-          participant is willing to give to the N. Therefore, there is no need
-          to calculate a crossover point — the <code>max_rating</code> column
-          is equivalent to the maximum amount willing to forgo for that social
-          distance.
-        </p>
+        <p>This numeric <code>Distance</code> column is required for estimating hyperbolic discounting parameters (<span class="var">logk</span>) or AUC. As in the long form, any label that does not match one of the seven social distances is set to missing (<code>NA</code>).</p>
+        <ol start="5">
+          <li>Maximum Amount Willing to Forgo
+            <p>In the Short Form, each decision directly represents the amount the participant is willing to give to the N. Therefore, there is no need to calculate a crossover point like in the original task. The <code>max_rating</code> column is then equivalent to the maximum amount willing to forgo for that social distance.</p></li>
+        </ol>
       </section>
 
       <section id="alternative-estimation" class="block">
@@ -1174,226 +981,116 @@
           <span class="section-num">08</span>
           <h2>Alternative Estimation Approach for Missing Data</h2>
         </div>
-
-        <p>
-          This is only used in the long-form task, where the indifferent point needs to be estimated 
-          from multiple decisions within each social distance. In contrast, the short-form task 
-          includes only one decision per social distance, meaning the indifferent point is directly observed.
-        </p>
-        
-        <strong>When to use this approach:</strong>
-          <ul>
-            <li>Datasets with missing trial-level responses (e.g., neuroimaging or large-scale online studies)</li>
-            <li>When the crossover-based method is not appropriate due to incomplete choice sequences</li>
-          </ul>
-
-        <p>
-          In these cases, the standard crossover-based method for estimating indifference points may not be
-          appropriate, as it relies on observing a complete sequence of choices within each
-          social distance.
-        </p>
-      
-        <p>
-          To address this, indifference points can alternatively be estimated using a
-          <strong>trial-level logistic regression approach</strong>, which uses all available observed trials
-          without requiring complete data.
-        </p>
-      
-        <p>
-          Specifically, we model the probability of choosing to share (coded as 1; keep = 0)
-          as a function of the amount of money forgone on each trial. The logistic regression
-          model is defined as: <code>logit(P(share)) = β₀ + β₁ × amount_forgone</code> </p>
-      
-        <p>
-          Here, <strong>amount_forgone</strong> represents the monetary cost associated with
-          choosing to share, ranging from <span class="money">$80</span> to <span class="money">$0</span> for the original task.
-          The model estimates how the probability of sharing changes as a function of increasing monetary cost by fitting
-          a continuous logistic choice function across this range of observed values.
-        </p>
-      
-        <p>
-          Rather than identifying a discrete switching point in the observed data, the model
-          describes a smooth decision curve over the range of possible forgone amounts.
-        </p>
-      
-        <p>
-          The indifference point is defined as the value of <strong>amount_forgone</strong> at
-          which the predicted probability of sharing equals 0.5. This represents the point of
-          equal likelihood between keeping and sharing and can be interpreted as the
-          participant’s maximum willingness to forgo monetary reward at a given social
-          distance.
-        </p>
-      
-        <p>
-          At this point, the logit equals zero, and the indifference point can be derived
-          analytically as: <code>Indifference Point = −β₀ / β₁</code> </p>
-      
-        <p>
-
-          <div class="callout">
-            <p><strong>Note.</strong> 
-              <ul>
-                <li>Participants with no variability in responses (i.e., always choosing to keep or
-                  always choosing to share) are assigned boundary values corresponding to the limits
-                  of the task, as logistic regression cannot be reliably estimated in the absence of
-                  response variability</li>
-                <li>
-                  Indifference points are not estimated for participant–distance
-                  combinations with fewer than three valid responses, as such cases do not provide
-                  sufficient information for stable model fitting  
-                </li>
-              </ul>
-            </p>
-          </div>
-      
-        <p>
-          This approach yields participant- and distance-specific estimates that are directly
-          comparable to those obtained from the crossover method and can be used in subsequent
-          analyses, such as estimating hyperbolic discounting parameters (log(k)) or area
-          under the curve (AUC).
-        </p>
-
+        <p>This is only used in the long-form task, where the indifference point needs to be estimated from multiple decisions within each social distance. In contrast, the short-form task includes only one decision per social distance, meaning the indifference point is directly observed.</p>
+        <p><strong>When to use this approach:</strong></p>
+        <ul>
+          <li>Datasets with missing trial-level responses (e.g., neuroimaging or large-scale online studies)</li>
+          <li>When the crossover-based method is not appropriate due to incomplete choice sequences</li>
+        </ul>
+        <p>In these cases, the standard crossover-based method for estimating indifference points may not be appropriate, as it relies on observing a complete sequence of choices within each social distance.</p>
+        <p>To address this, indifference points can alternatively be estimated using a trial-level logistic regression approach, which uses all available observed trials without requiring complete data.</p>
+        <p>Specifically, we model the probability of choosing to share (coded as 1; keep = 0) as a function of the amount of money forgone on each trial. The logistic regression model is defined as:</p>
+        <p><strong>logit(P(share)) = β₀ + β₁ × amount_forgone</strong></p>
+        <p>Here, <em>amount_forgone</em> represents the monetary cost associated with choosing to share, ranging from <span class="money">$80</span> to <span class="money">$0</span> across trials. The model estimates how the probability of sharing changes as a function of increasing monetary cost by fitting a continuous logistic choice function across this range of observed values.</p>
+        <p>Rather than identifying a discrete switching point in the observed data, the model describes a smooth decision curve over the range of possible forgone amounts.</p>
+        <p>The indifference point is defined as the value of <em>amount_forgone</em> at which the predicted probability of sharing equals 0.5. This represents the point of equal likelihood between keeping and sharing and can be interpreted as the participant's maximum willingness to forgo monetary reward at a given social distance.</p>
+        <p>At this point, the logit equals zero, and the indifference point can be derived analytically as:</p>
+        <p><strong>Indifference Point = −β₀ / β₁</strong></p>
+        <div class="callout">
+          <p><em>Note.</em> Participants with no variability in responses (i.e., always choosing to keep or always choosing to share) are assigned boundary values corresponding to the limits of the task, as logistic regression cannot be reliably estimated in the absence of response variability. Additionally, indifference points are not estimated for participant–distance combinations with fewer than three valid responses, as such cases do not provide sufficient information for stable model fitting.</p>
+        </div>
+        <p>This approach yields participant- and distance-specific estimates that can be used in subsequent analyses, such as estimating hyperbolic discounting parameters (log(k)) or area under the curve (AUC).</p>
+        <p>Note that these estimates are not identical to those from the crossover method. For a participant who switches once, the logistic estimate falls midway between the last amount kept and the first amount shared (e.g., 65 rather than 60). Participants who always kept the money are assigned 0 rather than −5. Use one method consistently within a dataset, and do not combine or directly compare estimates from the two methods.</p>
       </section>
-
 
       <section id="hyperbolic-model" class="block">
         <div class="section-head">
           <span class="section-num">09</span>
           <h2>Hyperbolic Model</h2>
         </div>
-        <p>
-          After computing the maximum amount willing to forgo for each participant and social distance, 
-          the next step is to estimate the hyperbolic discounting function using nonlinear mixed-effects 
-          modeling. A nonlinear mixed-effects model (NLME) is a statistical approach used to estimate 
-          nonlinear relationships while accounting for both: 
-        </p>
+        <p>After computing the maximum amount willing to forgo for each participant and social distance, the next step is to estimate the hyperbolic discounting function using nonlinear mixed-effects modeling. A nonlinear mixed-effects model (NLME) is a statistical approach used to estimate nonlinear relationships while accounting for both:</p>
         <ul>
-          <li><strong>Fixed effects</strong> — overall average <span class="var">V₀</span> and <span class="var">logk</span></li>
-          <li><strong>Random effects</strong> — participant-specific deviations in <span class="var">V₀</span> and <span class="var">logk</span>, corresponding to random intercepts and random effects on the discounting parameter</li>
+          <li>Fixed effects (overall average <span class="var">v0</span> and <span class="var">logk</span>)</li>
+          <li>Random effects (participant-specific deviations in <span class="var">v0</span> and <span class="var">logk</span>, corresponding to random intercepts and random effects on the discounting parameter)</li>
         </ul>
-        <p>  
-          This allows estimation of individual level discounting parameters while accounting for 
-          repeated observations across social distances. The provided R script uses the <code>nlme</code>
-          package to implement the hyperbolic model.
-        </p>
+        <p>This allows estimation of individual level discounting parameters while accounting for repeated observations across social distances. The provided R script uses the <code>nlme</code> package to implement the hyperbolic model.</p>
+        <p><strong>Choosing starting values.</strong> Nonlinear mixed-effects models are estimated iteratively, starting from initial guesses (starting values) for each parameter. If the starting values are far from the final estimates, the model can fail to converge or settle on a poorer solution. Rather than requiring users to try starting values by hand, the R script defines a function, <code>fit_best_start()</code>, in the Model Fitting Functions section near the top of the script. This function fits the model once for every combination of starting values in a grid (<code>start_grid</code>), skips any combination that fails to converge, and keeps the converged model with the highest log-likelihood (the best-fitting solution). It also prints how many of the starting values converged. All <code>nlme</code> models in the script use this function and the same control settings (<code>ctl</code>), which allow more iterations than the <code>nlme</code> defaults.</p>
+        <p>A table of every starting value tried, and the estimates each one reached, is saved with the model and can be viewed with <code>attr(model, "start_search")</code>. If the converged fits reach the same log-likelihood and the same estimates, the solution is stable and does not depend on the starting values. If they reach different estimates with similar log-likelihoods, the model may be poorly identified and should be simplified. If only a few starting values converge, results should be interpreted with caution.</p>
 
-        <h3>1. Base model (no predictors)</h3>
-        <p>
-          The base model estimates the hyperbolic function without including
-          predictors/covariates and is used to obtain participant-level
-          <span class="var">logk</span> values. Researchers should typically
-          (1) run the base model first, (2) extract individual
-          <span class="var">logk</span> values, and (3) use those values in
-          subsequent analyses (e.g., regression models).
-        </p>
+        <h3>1. Base Model (No Predictors)</h3>
+        <p>The base model estimates the hyperbolic function without including predictors/covariates and is used to obtain participant-level <span class="var">logk</span> values.</p>
+        <p>Researchers should typically:</p>
+        <ol>
+          <li>Run this base model first</li>
+          <li>Extract individual <span class="var">logk</span> values</li>
+          <li>Use those values in subsequent analyses (e.g., regression models)</li>
+        </ol>
         <p>Key components:</p>
         <ul>
-          <li><code>V₀ / (1 + exp(logk) * Distance)</code> → hyperbolic function</li>
-          <li><code>exp(logk)</code> → ensures the discounting parameter <span class="var">k</span> is positive</li>
-          <li><code>random = V₀ + logk ~ 1 | subnum</code> → estimates individual-level parameters</li>
+          <li><code>v0 / (1 + exp(logk) * Distance)</code> → hyperbolic function</li>
+          <li><code>exp(logk)</code> → ensures the discounting parameter (<span class="var">k</span>) is positive</li>
+          <li><code>random = v0 + logk ~ 1 | subnum</code> → estimates individual-level parameters</li>
+          <li><code>start_grid</code> and <code>fit_best_start()</code> → try a grid of starting values for <span class="var">v0</span> and <span class="var">logk</span> and keep the best-fitting model that converges</li>
         </ul>
 
-        <h3>2. Alternative models (optional but recommended)</h3>
-        <p>
-          Although the hyperbolic model is standard in social discounting
-          research, it is good practice to compare it with alternative models.
-          We compare it to an exponential model (constant rate of decline) and
-          a linear model (straight-line decrease).
-        </p>
-        <p>
-          Models are compared using Akaike's Information Criterion (AIC). AIC
-          balances model fit and model complexity; lower AIC values indicate
-          better-fitting models. We provide two ways to compare AIC:
-        </p>
-        <h4>Delta AIC (ΔAIC)</h4>
-        <p>
-          ΔAIC represents how much worse a model fits relative to the
-          best-fitting model. It is calculated by subtracting the lowest AIC
-          from each candidate model's AIC. In most cases, the hyperbolic model
-          has the lowest AIC, so ΔAIC values for exponential and linear are
-          positive:
-        </p>
+        <h3>2. Alternative Models (Optional but Recommended)</h3>
+        <p>Although the hyperbolic model is standard in social discounting research, it is good practice to compare it with alternative models. Here we compare it to an exponential and linear model. The exponential model assumes a constant rate of decline and the linear model assumes a straight-line decrease. Like the hyperbolic model, the exponential model (<code>v0 × exp(−exp(logk) × N)</code>) is estimated with <span class="var">logk</span> so that <span class="var">k</span> stays positive, and its starting values are also selected with <code>fit_best_start()</code>. Its <span class="var">logk</span> is not on the same scale as the hyperbolic <span class="var">logk</span> because <span class="var">k</span> plays a different role in the two equations, so the two should not be compared directly. Because the linear model (<code>v0 + k × N</code>) is not nonlinear, it is fit with the <code>lme()</code> function, which does not require starting values. It is estimated with maximum likelihood (<code>method = "ML"</code>) so that its AIC can be compared with the <code>nlme</code> models.</p>
+        <p>To evaluate which model best fits the data, we compare models using Akaike's Information Criterion (AIC). AIC balances model fit and model complexity, with lower AIC values indicating better-fitting models. The R script produces two model comparison tables. The first, created with the <code>aic_table()</code> function, reports for each model the number of parameters (K), the log-likelihood, AICc (AIC corrected for sample size), ΔAICc, AICc weights, and cumulative weights. The second table reports AIC weights calculated directly from each model's AIC. With large samples, AIC and AICc are nearly identical and lead to the same conclusions, and the interpretation guidelines below apply to both.</p>
+        <p><strong>Delta AIC (ΔAIC):</strong> ΔAIC represents how much worse a model fits relative to the best-fitting model (i.e., the model with the lowest AIC). It is calculated by subtracting the lowest AIC value across all candidate models from the AIC of each model. In most cases, the hyperbolic model will have the lowest AIC, meaning that the exponential and linear models will have positive ΔAIC values relative to the hyperbolic model. In this case, subtract AIC from hyperbolic model from that of exponential or linear model:</p>
         <div class="aic-rules">
-          <div class="row"><span class="tag">ΔAIC &lt; 2</span><span>Substantial support (models are essentially equivalent)</span></div>
-          <div class="row"><span class="tag">ΔAIC 4–7</span><span>Considerably less support</span></div>
-          <div class="row"><span class="tag">ΔAIC &gt; 10</span><span>Essentially no support (lower AIC model is a better fit)</span></div>
+          <div class="row"><span class="tag"><strong>ΔAIC &lt; 2</strong></span><span>→ substantial support (models are essentially equivalent)</span></div>
+          <div class="row"><span class="tag"><strong>ΔAIC 4–7</strong></span><span>→ considerably less support</span></div>
+          <div class="row"><span class="tag"><strong>ΔAIC &gt; 10</strong></span><span>→ essentially no support (lower AIC model is a better fit)</span></div>
         </div>
-        <h4>AIC weights</h4>
-        <p>
-          AIC weights represent the relative likelihood that each model is the
-          best among the candidate models. Each model is assigned a weight
-          between 0 and 1, with all weights summing to 1. A model with a high
-          AIC weight (close to 1) has strong support.
-        </p>
+        <p><strong>AIC Weights:</strong> AIC weights represent the relative likelihood that each model is the best among the candidate models. Each model is assigned an AIC weight with values ranging from 0 to 1 and all weights summing to 1. The model with a high AIC weight (close to 1) has strong support.</p>
 
-        <h3>3. Predictor model</h3>
-        <p>
-          In addition to estimating participant-level discounting parameters,
-          researchers may wish to examine whether individual differences
-          (e.g., demographic variables, personality traits, group membership)
-          predict variability in the social discounting function. The predictor
-          model extends the base hyperbolic model by including
-          predictors/covariates on the discounting rate parameter
-          (<span class="var">logk</span>). Positive coefficients indicate
-          steeper discounting (less generosity); negative coefficients indicate
-          shallower discounting (greater generosity).
-        </p>
+        <h3>3. Predictor Model</h3>
+        <p>In addition to estimating participant-level discounting parameters, researchers may wish to examine whether individual differences (e.g., demographic variables, personality traits, or group membership) predict variability in the social discounting function. This predictor model extends the base hyperbolic model by including predictors/covariates on the discounting rate parameter (<span class="var">logk</span>). Therefore, predictors explain between-person differences in how steeply generosity declines across social distances. Positive coefficients indicate steeper discounting (less generosity) whereas negative coefficients indicate shallower discounting (greater generosity)</p>
         <div class="callout">
-          <p><strong>Tips.</strong> Modify predictors to match variables in your dataset. Predictors in the fixed-effects list (<code>logk ~ </code>) model individual differences in discounting rate, not baseline generosity (<span class="var">V₀</span>). Ensure the number of starting values for <span class="var">logk</span> (<code>start = c(...)</code>) matches the number of predictors — the first value corresponds to the intercept of logk, followed by one value per predictor in the same order.</p>
+          <p>Tips for using this model:</p>
+          <ul style="margin: 0">
+            <li>Make sure you modify predictors to match variables available in your dataset</li>
+            <li>Predictors included in the fixed effects list (<code>logk ~ </code>) model individual differences in discounting rate, not baseline generosity (<span class="var">v0</span>)</li>
+            <li>Set <code>n_extra</code> in <code>fit_best_start()</code> to the number of predictors in the model. The starting values for the predictor slopes are set to 0, so they do not need to be specified by hand.</li>
+            <li>In the linear comparison model (fit with <code>lme()</code>), predictors of the discounting rate are written as interactions with Distance (e.g., <code>Distance:predictor</code>), so that the predictors affect the rate of decline, as in the hyperbolic and exponential models.</li>
+          </ul>
         </div>
 
-        <h3>Common issues and troubleshooting</h3>
-        <p>
-          When fitting nonlinear mixed-effects models, convergence issues are
-          relatively common. Singularity and non-convergence errors are often
-          related and can arise from similar underlying causes (e.g., poor
-          starting values, overly complex models, or limited variability in the
-          data).
-        </p>
+        <h3>Common Issues and Troubleshooting</h3>
+        <p>When fitting nonlinear mixed-effects models, convergence issues are relatively common. Singularity and non-convergence errors are often related and can arise from similar underlying issues (e.g., poor starting values, overly complex models, or limited variability in the data).</p>
 
-        <h4> 1. Singularity Error</h4>
-        <p>
-          Example Error:
-        </p>
-
+        <h4>1. Singularity Error</h4>
+        <p>Example Error:</p>
         <div class="curve-wrap" style="text-align: center;">
           <img src="Singularity Error.png" style="max-width: 700px; width: 100%; height: auto;">
         </div>
+        <p>This indicates that the model has reached an unstable or undefined solution during estimation. This can occur due to numerical issues (e.g., poor starting values) or because the model is too complex relative to the data.</p>
 
-        <p>
-          This indicates that the model has reached an unstable or undefined solution during estimation. 
-          This can occur due to numerical issues (e.g., poor starting values) or because the model is too complex relative to the data.
-        </p>
-
-        <h4> 2. Non-convergence (Maximum Iterations Reached)</h4>
-        <p>
-          Example Error:
-        </p>
-
+        <h4>2. Non-Convergence (Maximum Iterations Reached)</h4>
+        <p>Example Error:</p>
         <div class="curve-wrap" style="text-align: center;">
           <img src="Non-convergence Error.png" style="max-width: 700px; width: 100%; height: auto;">
         </div>
-
-        <p>
-          This means the model failed to find stable parameter estimated within the allowed number of iterations. 
-        </p>
+        <p>This means the model failed to find stable parameter estimates within the allowed number of iterations.</p>
 
         <div class="card tint">
-          <div class="card-label">Common causes</div>
+          <div class="card-label"><strong><em>Common Causes:</em></strong></div>
+          <p>Both errors typically arise from one or more of the following:</p>
           <ul style="margin: 0">
-            <li>Poor starting values for model parameters (<span class="var">V₀</span>, <span class="var">logk</span>)</li>
-            <li>Overly complex random-effects structure (e.g., random slopes for logk)</li>
-            <li>Limited variability in participant responses (e.g., always choosing 0 or the maximum)</li>
+            <li>Poor starting values for model parameters (<span class="var">v0</span>, <span class="var">logk</span>)</li>
+            <li>Overly complex random effects structure (e.g., random slopes for <span class="var">logk</span>)</li>
+            <li>Limited variability in participant responses (e.g., always choosing 0 or maximum)</li>
             <li>Too few observations per participant (especially in the Short Form)</li>
             <li>Predictors on very different scales (in predictor models)</li>
           </ul>
         </div>
         <div class="card tint">
-          <div class="card-label">Recommended solutions</div>
+          <div class="card-label"><strong><em>Recommended Solutions:</em></strong></div>
+          <p>The following steps can be used to resolve most convergence issues:</p>
           <ul style="margin: 0">
-            <li><strong>Adjust starting values:</strong> choose initial estimates close to plausible values (<span class="var">V₀</span> near mean <code>max_rating</code>, <span class="var">logk</span> near −1). Iteratively adjusting starting values is standard practice.</li>
-            <li><strong>Iteration limits:</strong> increase <code>msMaxIter</code> or adjust <code>tol</code> if convergence is not achieved.</li>
-            <li><strong>Simplify random effects:</strong> consider removing reducing model complexity by removing random effects (e.g., only allowing random intercepts), rather than estimating both participant-specific v) and logk simultaneously.</li>
+            <li>Widen the starting value grid: <code>fit_best_start()</code> automatically tries every combination of starting values in <code>start_grid</code>. If no starting values converge, add values to the grid (e.g., <span class="var">v0</span> near the mean <code>max_rating</code> and a wider range of <span class="var">logk</span> values). Check <code>attr(model, "start_search")</code> to see which starting values converged and whether they reached the same estimates.</li>
+            <li>Iteration limits: increase <code>msMaxIter</code>, <code>maxIter</code>, or <code>pnlsMaxIter</code> in the shared control settings (<code>ctl</code>) defined in the Model Fitting Functions section of the script.</li>
+            <li>Simplifying random effects: consider reducing model complexity by removing random effects (e.g., only allowing random intercepts), rather than estimating both participant-specific v0 and logk simultaneously</li>
           </ul>
         </div>
       </section>
@@ -1403,50 +1100,45 @@
           <span class="section-num">10</span>
           <h2>Extraction of logk and AUC</h2>
         </div>
-        <p>
-          Once the hyperbolic model has been fitted, the next step is to
-          extract participant-level estimates of social discounting. Two
-          commonly reported metrics are:
-        </p>
+        <p>Once the hyperbolic model has been fitted to the cleaned social discounting data, the next step is to extract participant-level estimates of social discounting. Two commonly reported metrics are:</p>
         <ol>
-          <li><span class="var">logk</span> — the model-based social discounting rate</li>
-          <li><strong>AUC</strong> (Area Under the Curve) — a model-free measure of overall generosity</li>
+          <li><span class="var">logk</span> – the model-based social discounting rate</li>
+          <li>AUC (Area Under the Curve) – a model-free measure of overall generosity</li>
         </ol>
-        <p>The procedures are the same for both the original task and the Short Form.</p>
+        <p>The procedures for extracting these metrics are the same for both the original Social Discounting Task and the Short Form.</p>
 
-        <h3>Extracting individual logk values</h3>
+        <h3>1. Extracting Individual logk Values</h3>
         <p>The hyperbolic model estimates two types of parameters:</p>
         <ul>
-          <li><strong>Fixed effects</strong> — population-average estimates of <span class="var">V₀</span> (baseline generosity) and <span class="var">logk</span> (discounting rate)</li>
-          <li><strong>Random effects</strong> — participant-level deviations from these averages</li>
+          <li>Fixed effects: population-average estimates of <span class="var">v0</span> (baseline generosity) and <span class="var">logk</span> (discounting rate)</li>
+          <li>Random effects: participant-level deviations from these averages</li>
         </ul>
-        <p>To obtain participant-specific logk values:</p>
-        <ol>
-          <li>Extract the random effect deviations for <span class="var">logk</span>. These represent how much each participant's discounting rate differs from the population average.</li>
-          <li>Repeat these random effects for each row in the dataset so that they align with the number of social distances per participant.</li>
-          <li>Extract the fixed-effect estimate for <span class="var">logk</span>.</li>
-          <li>Combine the fixed effect and the random effect to produce the final participant-level <span class="var">logk</span> values.</li>
-        </ol>
+        <p>To obtain participant-specific <span class="var">logk</span> values:</p>
+        <p>Each participant's <span class="var">logk</span> is the fixed effect (the population-average <span class="var">logk</span>) plus that participant's random effect (how far their <span class="var">logk</span> is from the population average). The <code>coef()</code> function performs this addition and returns one row per participant with that participant's estimated <span class="var">v0</span> and <span class="var">logk</span>. Participant IDs are taken from the row names of the <code>coef()</code> output and converted back to the same type as <code>subnum</code> in the data (e.g., numeric), so the <span class="var">logk</span> values can be merged with other variables. The result is a dataset (<code>individual_logk_df_base</code>) with one row per participant, containing the participant ID and estimated <span class="var">logk</span>. Because each <span class="var">logk</span> value is labeled with the participant ID it belongs to, it cannot be matched to the wrong participant, even if participants have missing social distances or the data are sorted differently. These values represent individual discounting rates, derived directly from observed behavior rather than from predictors. They can then be used in downstream analyses such as correlations, regressions, or group comparisons.</p>
+        <p>For the optional predictor model, each participant's <span class="var">logk</span> also depends on their predictor values. It equals the participant-specific intercept (the fixed intercept plus the participant's random effect) plus each fixed slope multiplied by the participant's value on that predictor. The script computes this using <code>coef()</code> and a matrix of each participant's predictor values. The predictors in this matrix must match those in the predictor model, in the same order.</p>
 
-        <h3>Extracting Area Under the Curve (AUC)</h3>
+        <h3>2. Extracting Area Under the Curve (AUC)</h3>
         <p>AUC provides a model-free measure of overall generosity:</p>
         <ol>
           <li>For each participant, the amount willing to forgo is plotted across all social distances (1, 2, 5, 10, 20, 50, 100).</li>
-          <li> The area under this curve is calculated using numerical integration (trapezoidal method), which treats each pair of adjacent points (willingness to forgo at two successive social distances) as a trapezoid. For each interval, the area is computed as: <code>Difference in N * Average of adjacent willingness-to-forgo values</code> The difference in social distance (ΔN) represents the spacing between adjacent distance values (e.g., 2 − 1, 5 − 2, 10 − 5), which is not constant across the task. The segment-wise areas are then summed to produce a single raw AUC value per participant. </li>          
-          <li>The resulting raw AUC value is then normalized by the maximum possible area to yield a standardized AUC value bounded between 0 and 1. The normalization is defined as: <code>Maximum N - Minimum N * Maximum Amount Able to Forgo</code> This reflects the total span of the observed social distance axis (i.e., 100 − 1 = 99), over which the trapezoidal integration is performed. </li>
-          <ul>
-            <li>For the Original Social Discounting Task this is 99 * 80</li>
-            <li>For the Social Discounting Short Form this is 99 * 10</li>
-          </ul>
-          <li>Higher AUC values indicate greater generosity and shallower social discounting; lower AUC values indicate steeper discounting.</li>
+          <li>The area under this curve is calculated using numerical integration (trapezoidal method) which treats each pair of adjacent points (amount willing to forgo for two social distances) as a trapezoid. For each interval, the area is computed as: (difference in social distance) x (average of adjacent willingness-to-forgo values). The segment-wise areas are then summed to produce a single raw AUC value per participant</li>
+          <li>The resulting raw AUC value is then normalized by the maximum possible area to yield a standardized AUC value bounded between 0 and 1. The normalization is defined as: (Maximum <em>N</em> – Minimum <em>N</em>) x maximum possible amount to forgo. This reflects the total span of the observed social distance axis (i.e., 100 − 1 = 99), over which the trapezoidal integration is performed.
+            <ul>
+              <li>For the Original Social Discounting Task this is 99 * 80</li>
+              <li>For the Social Discounting Short Form this is 99 * 10</li>
+            </ul>
+          </li>
+          <li>Higher AUC values indicate greater generosity and shallower social discounting, and lower AUC values indicate steeper discounting</li>
         </ol>
-        <p>
-          Unlike logk, AUC does not rely on fitting a specific model and
-          provides a complementary perspective on overall social valuation across
-          distances.
-        </p>
+        <p>Unlike <span class="var">logk</span>, AUC does not rely on fitting a specific model and provides a complementary perspective on overall social valuation across distances.</p>
         <div class="callout">
-          <p><strong>Summary.</strong> <span class="var">logk</span> captures how rapidly generosity declines with social distance (model-based). AUC captures overall generosity across all social distances (model-free). Both metrics are useful for individual-differences analyses, allowing researchers to relate social discounting behavior to personality traits, demographic variables, or other outcomes.</p>
+          <p><strong>Summary</strong></p>
+          <p>By extracting <span class="var">logk</span> and AUC:</p>
+          <ul>
+            <li><span class="var">logk</span> captures how rapidly generosity declines with social distance (model-based)</li>
+            <li>AUC captures overall generosity across social distances (model-free)</li>
+          </ul>
+          <p>Both metrics are useful for individual differences analyses, allowing researchers to relate social discounting behavior to personality traits, demographic variables, or other outcomes.</p>
         </div>
       </section>
 
@@ -1455,32 +1147,44 @@
           <span class="section-num">11</span>
           <h2>Visualization</h2>
         </div>
-        <p>
-          Visualizing participants' generosity across social distance provides
-          an intuitive representation of social discounting behavior. The plot
-          shows the proportion of the maximum amount participants are willing
-          to forgo at each social distance.
-        </p>
+        <p>Visualizing participants' generosity across social distance provides an intuitive representation of social discounting behavior. The plot shows the proportion of the maximum amount participants are willing to forgo at each social distance.</p>
+        <p><strong>Key features of the visualization:</strong></p>
+        <ol>
+          <li>Scaling
+            <ul>
+              <li>Values are expressed as a proportion of the maximum possible amount (percentage).</li>
+              <li>This ensures that curves are directly comparable across participants, groups, and task versions.</li>
+            </ul>
+          </li>
+          <li>Group Comparisons (Optional)
+            <ul>
+              <li>If a grouping variable (e.g., experimental condition or demographic group), named <code>Group_var</code> and coded 1 and 2, is present, separate curves are plotted for each group.</li>
+              <li>Shaded ribbons represent ±1 standard error of the mean, providing a visual sense of variability within each group.</li>
+            </ul>
+          </li>
+          <li>Single Curve (No Groups)
+            <ul>
+              <li>If no grouping variable is present, a single curve is plotted with a shaded ribbon representing ±1 standard error across all participants.</li>
+            </ul>
+          </li>
+          <li>Interpretation
+            <ul>
+              <li>Steeper declines in the curve reflect steeper social discounting (participants give less as social distance increases).</li>
+              <li>Flatter curves indicate shallower discounting (participants maintain generosity across social distances).</li>
+              <li>The curve can also be compared visually to individual or group-level <span class="var">logk</span> estimates.</li>
+            </ul>
+          </li>
+        </ol>
+        <p>This visualization is useful both for descriptive reporting and for checking whether the hyperbolic model captures the overall pattern of generosity in the sample.</p>
 
         <div class="curve-wrap" style="text-align: center;">
-          <a href = "https://www.nature.com/articles/s44271-025-00353-z" target = "_blank" rel = "noopener noreferrer">
+          <div class="card-label">Figure 3 (from <a href="#nero2025" class="cite">Nero et al., 2025</a>)</div>
+          <a href="https://www.nature.com/articles/s44271-025-00353-z" target="_blank" rel="noopener noreferrer">
             <img src="Figure1.png" alt="Social discounting curves" style="max-width: 700px; width: 100%; height: auto;">
           </a>
-          <div class="caption">From <a href="#nero2025" class="cite">Nero et al., 2025</a>. Social discounting curves with standard error for the current study (control and high psychopathy group) and (<a href="#vekaria2017" class="cite">Vekaria et al., 2017</a> (controls). The high psychopathy group had higher discounting than both control groups, with control groups overlapping. The shaded region represents the standard error around the mean.</div>
-        </div>  
-
-        <h3>Key features of the visualization</h3>
-        <ol>
-          <li><strong>Scaling.</strong> Values are expressed as a proportion of the maximum possible amount (percentage). This ensures curves are directly comparable across participants, groups, and task versions.</li>
-          <li><strong>Group comparisons (optional).</strong> If a grouping variable (e.g., experimental condition or demographic group) is present, separate curves are plotted for each group. Shaded ribbons represent ±1 standard error of the mean, providing a visual sense of variability within each group.</li>
-          <li><strong>Single curve (no groups).</strong> If no grouping variable is present, a single curve is plotted with a shaded ribbon representing ±1 standard error across all participants.</li>
-          <li><strong>Interpretation.</strong> Steeper declines in the curve reflect steeper social discounting (participants give less as social distance increases). Flatter curves indicate shallower discounting. The curve can also be compared visually to individual or group-level logk estimates.</li>
-        </ol>
-        <p>
-          This visualization is useful both for descriptive reporting and for
-          checking whether the hyperbolic model captures the overall pattern of
-          generosity in the sample.
-        </p>
+          <div class="caption"><em>Hyperbolic Social Discounting Curve Across Studies</em></div>
+          <div class="caption"><em>Note.</em> From <a href="#nero2025" class="cite">Nero et al., 2025</a>. Social discounting curves with standard error for the current study (control and high psychopathy group) and Vekaria et al (2017) (controls). The high psychopathy group had higher discounting than both control groups, with control groups overlapping. The shaded region represents the standard error around the mean.</div>
+        </div>
       </section>
 
       <section id="references" class="block">
@@ -1528,13 +1232,13 @@
 
       <footer class="foot">
         <p>
-          Correspondence concerning this manual and package should be addressed to Naomi
+          Correspondence concerning this manual should be addressed to Naomi
           Nero, Department of Psychology, Georgetown University, White Gravenor
           Hall, Washington, DC 20057, United States. Email:
           <a href="mailto:nn444@georgetown.edu">nn444@georgetown.edu</a>.
         </p>
         <p style="color: var(--fg-faint); font-size: 0.78rem;">
-          The Social Discounting Task Manual · Version 1.0.0 · April 2026
+          The Social Discounting Task Manual · Version 2.0.0 · November 2026
         </p>
       </footer>
     </main>
@@ -1595,10 +1299,10 @@
 
         <div class="dock-text">
           Nero, N., & Marsh, A. A. (2026). An Open-Source Educational Toolkit for Administering and Analyzing Social
-          Discounting Tasks (Version 1.0.0). https://doi.org/10.17605/OSF.IO/4UDWX
+          Discounting Tasks (Version 2.0.0). https://doi.org/10.17605/OSF.IO/4UDWX
         </div>
 
-        <button onclick="navigator.clipboard.writeText('Nero, N., & Marsh, A. A. (2026). An Open-Source Educational Toolkit for Administering and Analyzing Social Discounting Tasks (Version 1.0.0). https://doi.org/10.17605/OSF.IO/4UDWX')">
+        <button onclick="navigator.clipboard.writeText('Nero, N., & Marsh, A. A. (2026). An Open-Source Educational Toolkit for Administering and Analyzing Social Discounting Tasks (Version 2.0.0). https://doi.org/10.17605/OSF.IO/4UDWX')">
           Copy
         </button>
       </div>
